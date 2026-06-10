@@ -1,7 +1,9 @@
 services:
   - type: web
-    name: pms
+    name: pms-app
     runtime: python
+    repo: https://github.com/Rudra-iaf-rt/Project-Management-System.git  # Change this
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: daphne -b 0.0.0.0 -p $PORT pms.asgi:application
     envVars:
@@ -10,9 +12,11 @@ services:
           name: pms-db
           property: connectionString
       - key: SECRET_KEY
-        generateValue: true
+        sync: false
       - key: DEBUG
         value: false
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
 
 databases:
   - name: pms-db
