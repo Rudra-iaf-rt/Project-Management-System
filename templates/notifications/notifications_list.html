@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - Project Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-bell"></i> Notifications</h2>
+        <button class="btn btn-outline-primary" onclick="notificationSystem.markAllAsRead()">
+            <i class="fas fa-check-double"></i> Mark All as Read
+        </button>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="allNotificationsList">
+                    <thead>
+                        <tr>
+                            <th width="50">Type</th>
+                            <th>Notification</th>
+                            <th width="150">Time</th>
+                            <th width="100">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for notification in notifications %}
+                        <tr class="{% if not notification.is_read %}table-active{% endif %}">
+                            <td>
+                                <i class="fas {{ notification.get_icon }} fa-lg"></i>
+                            </td>
+                            <td>
+                                <strong>{{ notification.title }}</strong><br>
+                                <small class="text-muted">{{ notification.message }}</small>
+                                {% if notification.link %}
+                                    <br><a href="{{ notification.link }}" class="small">View Details →</a>
+                                {% endif %}
+                            </td>
+                            <td>{{ notification.created_at|timesince }} ago</td>
+                            <td>
+                                {% if not notification.is_read %}
+                                    <button class="btn btn-sm btn-primary" onclick="markNotificationReadLocal({{ notification.id }})">
+                                        Mark Read
+                                    </button>
+                                {% else %}
+                                    <span class="badge bg-success">Read</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-5">
+                                <i class="fas fa-bell-slash fa-3x mb-3 d-block"></i>
+                                No notifications yet
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if notifications.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if notifications.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ notifications.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for i in notifications.paginator.page_range %}
+                        <li class="page-item {% if notifications.number == i %}active{% endif %}">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    
+                    {% if notifications.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ notifications.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function markNotificationReadLocal(id) {
+    fetch(`/notifications/${id}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}
+                            

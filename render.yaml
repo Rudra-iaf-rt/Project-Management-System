@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: pms
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: daphne -b 0.0.0.0 -p $PORT pms.asgi:application
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pms-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+
+databases:
+  - name: pms-db
+    plan: free

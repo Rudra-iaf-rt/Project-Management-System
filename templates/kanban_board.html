@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="kanban-container">
+    <div class="kanban-header mb-4">
+        <h2>Kanban Board</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <i class="fas fa-plus"></i> Add Task
+        </button>
+    </div>
+    
+    <div class="kanban-board">
+        <!-- Pending Column -->
+        <div class="kanban-column">
+            <div class="column-header bg-warning">
+                <h5><i class="fas fa-hourglass-start"></i> Pending</h5>
+                <span class="task-count">{{ pending_tasks|length }}</span>
+            </div>
+            <div class="task-list" data-status="PENDING">
+                {% for task in pending_tasks %}
+                <div class="task-card" data-task-id="{{ task.id }}">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-meta">
+                        <span class="priority priority-{{ task.priority|lower }}">
+                            {{ task.get_priority_display }}
+                        </span>
+                        <span class="due-date">
+                            <i class="far fa-calendar-alt"></i> {{ task.deadline|date:"M d" }}
+                        </span>
+                    </div>
+                    <div class="task-assignee">
+                        <img src="{{ task.assigned_to.profile_picture.url|default:'https://via.placeholder.com/30' }}" alt="">
+                        <span>{{ task.assigned_to.username }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- In Progress Column -->
+        <div class="kanban-column">
+            <div class="column-header bg-info">
+                <h5><i class="fas fa-spinner"></i> In Progress</h5>
+                <span class="task-count">{{ in_progress_tasks|length }}</span>
+            </div>
+            <div class="task-list" data-status="IN_PROGRESS">
+                {% for task in in_progress_tasks %}
+                <div class="task-card" data-task-id="{{ task.id }}">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-meta">
+                        <span class="priority priority-{{ task.priority|lower }}">
+                            {{ task.get_priority_display }}
+                        </span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: {{ task.progress }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Testing Column -->
+        <div class="kanban-column">
+            <div class="column-header bg-secondary">
+                <h5><i class="fas fa-vial"></i> Testing</h5>
+                <span class="task-count">{{ testing_tasks|length }}</span>
+            </div>
+            <div class="task-list" data-status="TESTING">
+                {% for task in testing_tasks %}
+                <div class="task-card" data-task-id="{{ task.id }}">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-description">{{ task.description|truncatewords:10 }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Completed Column -->
+        <div class="kanban-column">
+            <div class="column-header bg-success">
+                <h5><i class="fas fa-check-circle"></i> Completed</h5>
+                <span class="task-count">{{ completed_tasks|length }}</span>
+            </div>
+            <div class="task-list" data-status="COMPLETED">
+                {% for task in completed_tasks %}
+                <div class="task-card completed" data-task-id="{{ task.id }}">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="completed-date">
+                        <i class="fas fa-check"></i> Completed {{ task.completed_at|timesince }} ago
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Drag and drop functionality
+    const taskCards = document.querySelectorAll('.task-card');
+    const taskLists = document.querySelectorAll('.task-list');
+    
+    taskCards.forEach(card => {
+        card.setAttribute('draggable', true);
+        
+        card.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', card.dataset.taskId);
+            card.classList.add('dragging');
+        });
+        
+        card.addEventListener('dragend', (e) => {
+            card.classList.remove('dragging');
+        });
+    });
+    
+    taskLists.forEach(list => {
+        list.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        
+        list.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            const taskId = e.dataTransfer.getData('text/plain');
+            const newStatus = list.dataset.status;
+            
+            // Update task status via API
+            const response = await fetch(`/api/tasks/${taskId}/update-status/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            
+            if (response.ok) {
+                location.reload();
+            }
+        });
+    });
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

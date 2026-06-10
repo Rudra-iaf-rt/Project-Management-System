@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ team.name }} - Team Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>{{ team.name }}</h4>
+                        {% if can_edit %}
+                            <div>
+                                <a href="{% url 'add_member' team.id %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-user-plus"></i> Add Member
+                                </a>
+                                <a href="{% url 'team_update' team.id %}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>{{ team.description }}</p>
+                    <hr>
+                    <h5>Team Members</h5>
+                    <div class="row">
+                        {% for member in members %}
+                            <div class="col-md-4 mb-3">
+                                <div class="member-card">
+                                    <div class="d-flex align-items-center">
+                                        <div class="member-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                            {{ member.first_name|first|upper }}{{ member.last_name|first|upper }}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ member.get_full_name }}</h6>
+                                            <small class="text-muted">{{ member.designation|default:"Team Member" }}</small>
+                                            {% for role in team_roles %}
+                                                {% if role.user == member %}
+                                                    <br><small class="badge bg-info">{{ role.role }}</small>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Team Chat</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'chat_room' team.id %}" class="btn btn-primary w-100">
+                        <i class="fas fa-comments"></i> Join Team Chat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

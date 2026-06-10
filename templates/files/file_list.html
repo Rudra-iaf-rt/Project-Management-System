@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Files - Project Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Project Files</h2>
+        <a href="{% url 'file_upload' %}" class="btn btn-primary">
+            <i class="fas fa-upload"></i> Upload File
+        </a>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="search" class="form-control" placeholder="Search files..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="type" class="form-control">
+                        <option value="">All Types</option>
+                        <option value="DOCUMENT" {% if file_type == 'DOCUMENT' %}selected{% endif %}>Documents</option>
+                        <option value="IMAGE" {% if file_type == 'IMAGE' %}selected{% endif %}>Images</option>
+                        <option value="PDF" {% if file_type == 'PDF' %}selected{% endif %}>PDFs</option>
+                        <option value="ARCHIVE" {% if file_type == 'ARCHIVE' %}selected{% endif %}>Archives</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Files Grid -->
+    <div class="row">
+        {% for file in files %}
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="file-icon mb-3">
+                            {% if file.file_type == 'PDF' %}
+                                <i class="fas fa-file-pdf fa-4x text-danger"></i>
+                            {% elif file.file_type == 'IMAGE' %}
+                                <i class="fas fa-file-image fa-4x text-primary"></i>
+                            {% elif file.file_type == 'DOCUMENT' %}
+                                <i class="fas fa-file-word fa-4x text-info"></i>
+                            {% else %}
+                                <i class="fas fa-file fa-4x text-secondary"></i>
+                            {% endif %}
+                        </div>
+                        <h6 class="card-title">{{ file.filename|truncatechars:20 }}</h6>
+                        <p class="text-muted small">
+                            {{ file.get_file_size_display }}<br>
+                            Uploaded by {{ file.uploaded_by.username }}
+                        </p>
+                        <div class="btn-group w-100">
+                            <a href="{% url 'file_download' file.id %}" class="btn btn-sm btn-success">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                            <a href="{% url 'file_delete' file.id %}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">No files found. Upload your first file!</div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

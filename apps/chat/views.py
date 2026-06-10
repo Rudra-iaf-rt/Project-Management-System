@@ -1,0 +1,52 @@
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import ChatMessage
+from apps.teams.models import Team
+
+@login_required
+def chat_room(request, team_id):
+    """Chat room view"""
+    team = get_object_or_404(Team, id=team_id)
+    
+    # Check if user is member of the team
+    if request.user not in team.members.all() and request.user.role != 'SUPER_ADMIN':
+        from django.shortcuts import redirect
+        from django.contrib import messages
+        messages.error(request, 'You are not a member of this team.')
+        return redirect('team_list')
+    
+    # Get previous messages
+    messages = ChatMessage.objects.filter(team=team)[:50]
+    
+    context = {
+        'team': team,
+        'messages': messages,
+    }
+    return render(request, 'chat/chat_room.html', context)
+
+@login_required
+def send_message_api(request):
+    """API endpoint to send message"""
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        team_id = data.get('team_id')
+        message = data.get('message')
+        
+        team = get_object_or_404(Team, id=team_id)
+        
+        chat_message = ChatMessage.objects.create(
+            user=request.user,
+            team=team,
+            message=message
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': message,
+            'username': request.user.username,
+            'timestamp': chat_message.timestamp.isoformat()
+        })
+    
+    return JsonResponse({'success': False}, status=400)

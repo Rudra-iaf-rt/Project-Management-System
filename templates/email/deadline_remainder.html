@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Deadline Reminder</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #dc3545;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .urgent {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .task-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid #dc3545;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏰ Task Deadline Reminder</h1>
+            <p>Your tasks are approaching their deadlines</p>
+        </div>
+        
+        <div class="content">
+            <h2>Hello {{ user.get_full_name }},</h2>
+            <p>This is a reminder that the following tasks are due soon:</p>
+            
+            {% for task in tasks %}
+            <div class="task-item">
+                <h3>{{ task.title }}</h3>
+                <p><strong>Project:</strong> {{ task.project.name }}</p>
+                <p><strong>Due Date:</strong> {{ task.deadline|date:"F d, Y H:i" }}</p>
+                <p><strong>Days Remaining:</strong> {{ task.days_remaining }} days</p>
+                {% if task.days_remaining <= 1 %}
+                    <div class="urgent">
+                        ⚠️ <strong>URGENT:</strong> This task is due very soon!
+                    </div>
+                {% endif %}
+                <a href="{{ site_url }}/tasks/{{ task.id }}/" style="color: #dc3545;">View Task →</a>
+            </div>
+            {% endfor %}
+            
+            <div style="text-align: center;">
+                <a href="{{ site_url }}/tasks/" class="button">View All Tasks</a>
+            </div>
+            
+            <p style="margin-top: 30px;">Best regards,<br>
+            <strong>Project Management System Team</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated reminder. Please take necessary action.</p>
+            <p>&copy; 2024 Project Management System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports & Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Reports & Analytics</h2>
+    
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Total Projects</h5>
+                    <h3>{{ total_projects }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Completed Projects</h5>
+                    <h3>{{ completed_projects }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5>Total Tasks</h5>
+                    <h3>{{ total_tasks }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5>Completed Tasks</h5>
+                    <h3>{{ completed_tasks }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Generation Cards -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-folder-open"></i> Project Report</h5>
+                </div>
+                <div class="card-body">
+                    <p>Generate detailed project report including:</p>
+                    <ul>
+                        <li>Project list with status and progress</li>
+                        <li>Task breakdown by project</li>
+                        <li>Budget utilization</li>
+                        <li>Team composition</li>
+                    </ul>
+                    <form method="post" action="{% url 'project_report' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-file-excel"></i> Generate Excel Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-tasks"></i> Task Report</h5>
+                </div>
+                <div class="card-body">
+                    <p>Generate comprehensive task report including:</p>
+                    <ul>
+                        <li>Task status distribution</li>
+                        <li>Priority breakdown</li>
+                        <li>Deadline tracking</li>
+                        <li>Assignment overview</li>
+                    </ul>
+                    <form method="post" action="{% url 'task_report' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-file-pdf"></i> Generate PDF Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-users"></i> Employee Performance</h5>
+                </div>
+                <div class="card-body">
+                    <p>Generate employee performance report including:</p>
+                    <ul>
+                        <li>Task completion rates</li>
+                        <li>Productivity metrics</li>
+                        <li>On-time delivery</li>
+                        <li>Performance ranking</li>
+                    </ul>
+                    <form method="post" action="{% url 'employee_performance' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-chart-line"></i> Generate Performance Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

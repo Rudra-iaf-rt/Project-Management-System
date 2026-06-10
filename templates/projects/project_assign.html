@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assign Team Members - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Assign Team Members to: {{ project.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Current Team Members</label>
+                            <div class="current-members">
+                                {% for member in project.team_members.all %}
+                                    <span class="badge bg-primary me-2 mb-2 p-2">
+                                        {{ member.get_full_name }}
+                                        <a href="{% url 'project_remove_member' project.id member.id %}" class="text-white ms-2" onclick="return confirm('Remove this member?')">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    </span>
+                                {% empty %}
+                                    <p class="text-muted">No members assigned yet</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Add New Members</label>
+                            <select name="members" class="form-control" multiple size="10">
+                                {% for user in available_users %}
+                                    <option value="{{ user.id }}">{{ user.get_full_name }} ({{ user.designation|default:"Employee" }})</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Hold Ctrl to select multiple members</small>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Note:</strong> Added members will be able to view and contribute to this project.
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Back to Project
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Add Selected Members
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

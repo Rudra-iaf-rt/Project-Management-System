@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Project Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Header -->
+    <div class="welcome-header mb-4">
+        <h1 class="display-5">Welcome, {{ request.user.get_full_name }}</h1>
+        <p class="lead">Super Admin Dashboard - System Overview</p>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card stats-card-primary">
+                <div class="stats-icon">
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+                <div class="stats-info">
+                    <h3>{{ total_users }}</h3>
+                    <p>Total Users</p>
+                </div>
+                <div class="stats-trend">
+                    <span class="text-success">
+                        <i class="fas fa-arrow-up"></i> +12%
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-icon">
+                    <i class="fas fa-folder-open fa-2x"></i>
+                </div>
+                <div class="stats-info">
+                    <h3>{{ total_projects }}</h3>
+                    <p>Total Projects</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card stats-card-info">
+                <div class="stats-icon">
+                    <i class="fas fa-tasks fa-2x"></i>
+                </div>
+                <div class="stats-info">
+                    <h3>{{ total_tasks }}</h3>
+                    <p>Total Tasks</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-icon">
+                    <i class="fas fa-user-tie fa-2x"></i>
+                </div>
+                <div class="stats-info">
+                    <h3>{{ total_managers }}</h3>
+                    <p>Project Managers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Analytics -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line"></i> System Activity</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="systemActivityChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> Project Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="projectStatusChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'project_create' %}" class="btn btn-primary w-100">
+                                <i class="fas fa-plus"></i> Create Project
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'task_create' %}" class="btn btn-success w-100">
+                                <i class="fas fa-check-circle"></i> Create Task
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'team_create' %}" class="btn btn-info w-100">
+                                <i class="fas fa-users"></i> Create Team
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-warning w-100" onclick="generateSystemReport()">
+                                <i class="fas fa-chart-bar"></i> Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Users and System Logs -->
+    <div class="row g-4">
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-user-plus"></i> Recent Users</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Department</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in recent_users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if user.profile_picture %}
+                                                <img src="{{ user.profile_picture.url }}" class="rounded-circle me-2" width="30" height="30">
+                                            {% else %}
+                                                <div class="avatar-placeholder bg-secondary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-size: 12px;">
+                                                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <strong>{{ user.get_full_name }}</strong><br>
+                                                <small class="text-muted">{{ user.username }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if user.role == 'SUPER_ADMIN' %}danger{% elif user.role == 'PROJECT_MANAGER' %}warning{% else %}info{% endif %}">
+                                            {{ user.get_role_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.department|default:"-" }}</td>
+                                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No users found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Recent System Activity</h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <div class="activity-timeline">
+                        {% for activity in recent_activities %}
+                            <div class="activity-item mb-3 pb-2 border-bottom">
+                                <div class="d-flex">
+                                    <div class="activity-icon me-2">
+                                        <i class="fas fa-user-circle text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="mb-0">{{ activity.action }}</p>
+                                        <small class="text-muted">
+                                            {{ activity.user.get_full_name }} • {{ activity.timestamp|timesince }} ago
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center text-muted">No recent activity</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// System Activity Chart
+const ctx1 = document.getElementById('systemActivityChart')?.getContext('2d');
+if (ctx1) {
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Projects',
+                data: [12, 19, 3, 5, 2, 3],
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Tasks',
+                data: [45, 52, 38, 47, 42, 56],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Users',
+                data: [30, 35, 42, 48, 55, 62],
+                borderColor: 'rgb(255, 159, 64)',
+                backgroundColor: 'rgba(255, 159, 64, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+}
+
+// Project Status Chart
+const ctx2 = document.getElementById('projectStatusChart')?.getContext('2d');
+if (ctx2 && {{ system_stats.projects_by_status|safe }}) {
+    const statusData = {{ system_stats.projects_by_status|safe }};
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'In Progress', 'Completed', 'On Hold'],
+            datasets: [{
+                data: statusData,
+                backgroundColor: [
+                    '#dc3545',
+                    '#ffc107',
+                    '#28a745',
+                    '#6c757d'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function generateSystemReport() {
+    window.location.href = "{% url 'project_report' %}";
+}
+</script>
+
+<style>
+.stats-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
+}
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.stats-card-primary .stats-icon {
+    background: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+}
+.stats-card-success .stats-icon {
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+.stats-card-info .stats-icon {
+    background: rgba(13, 202, 240, 0.1);
+    color: #0dcaf0;
+}
+.stats-card-warning .stats-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+.stats-info h3 {
+    margin: 0;
+    font-size: 28px;
+}
+.stats-info p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+.avatar-placeholder {
+    font-weight: bold;
+}
+</style>
+{% endblock %}

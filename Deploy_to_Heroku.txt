@@ -1,0 +1,6 @@
+heroku create your-pms-app
+heroku addons:create heroku-postgresql:hobby-dev
+heroku addons:create heroku-redis:hobby-dev
+git push heroku main
+heroku run python manage.py migrate
+heroku open

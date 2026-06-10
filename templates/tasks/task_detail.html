@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ task.title }} - Task Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>{{ task.title }}</h4>
+                        <div>
+                            {% if can_edit %}
+                                <a href="{% url 'task_update' task.id %}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{% url 'task_delete' task.id %}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>Project:</strong> {{ task.project.name }}</p>
+                            <p><strong>Assigned To:</strong> {{ task.assigned_to.get_full_name }}</p>
+                            <p><strong>Assigned By:</strong> {{ task.assigned_by.get_full_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Priority:</strong> 
+                                <span class="badge bg-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
+                                    {{ task.get_priority_display }}
+                                </span>
+                            </p>
+                            <p><strong>Status:</strong>
+                                <span class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %}">
+                                    {{ task.get_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>Deadline:</strong> 
+                                <span class="{% if task.is_overdue %}text-danger{% endif %}">
+                                    {{ task.deadline|date:"F d, Y H:i" }}
+                                    {% if task.is_overdue %}(Overdue){% endif %}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6>Description</h6>
+                    <p>{{ task.description|linebreaks }}</p>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Time Tracking</h6>
+                            <p>Estimated Hours: {{ task.estimated_hours }} hours</p>
+                            <p>Actual Hours: {{ task.actual_hours }} hours</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Timeline</h6>
+                            <p>Created: {{ task.created_at|date:"F d, Y H:i" }}</p>
+                            <p>Last Updated: {{ task.updated_at|date:"F d, Y H:i" }}</p>
+                            {% if task.completed_at %}
+                                <p>Completed: {{ task.completed_at|date:"F d, Y H:i" }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Update Status</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'update_task_status' task.id %}">
+                        {% csrf_token %}
+                        <select name="status" class="form-control mb-3">
+                            <option value="PENDING" {% if task.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                            <option value="IN_PROGRESS" {% if task.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                            <option value="TESTING" {% if task.status == 'TESTING' %}selected{% endif %}>Testing</option>
+                            <option value="COMPLETED" {% if task.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

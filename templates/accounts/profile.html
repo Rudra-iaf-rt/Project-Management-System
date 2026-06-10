@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Project Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Profile Card -->
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if request.user.profile_picture %}
+                        <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px; font-size: 48px;">
+                            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                        </div>
+                    {% endif %}
+                    
+                    <h4>{{ request.user.get_full_name }}</h4>
+                    <p class="text-muted">@{{ request.user.username }}</p>
+                    
+                    <span class="badge bg-{% if request.user.role == 'SUPER_ADMIN' %}danger{% elif request.user.role == 'PROJECT_MANAGER' %}warning{% else %}info{% endif %} mb-3">
+                        {{ request.user.get_role_display }}
+                    </span>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'change_password' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-key"></i> Change Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted">Member Since</label>
+                        <p>{{ request.user.date_joined|date:"F d, Y" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted">Last Login</label>
+                        <p>{{ request.user.last_login|date:"F d, Y H:i"|default:"Never" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted">Department</label>
+                        <p>{{ request.user.department|default:"Not specified" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted">Designation</label>
+                        <p>{{ request.user.designation|default:"Not specified" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Edit Profile Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Edit Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                {{ user_form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                {{ user_form.last_name }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            {{ user_form.email }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            {{ user_form.phone }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Department</label>
+                            {{ user_form.department }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Designation</label>
+                            {{ user_form.designation }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Profile Picture</label>
+                            {{ user_form.profile_picture }}
+                        </div>
+                        
+                        <hr>
+                        <h6>Additional Information</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Bio</label>
+                            {{ profile_form.bio }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Skills</label>
+                            {{ profile_form.skills }}
+                            <small class="text-muted">Comma-separated skills (e.g., Python, Django, React)</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Experience (Years)</label>
+                                {{ profile_form.experience_years }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Emergency Contact</label>
+                                {{ profile_form.emergency_contact }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            {{ profile_form.address }}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for activity in request.user.activities.all|slice:":10" %}
+                            <div class="timeline-item d-flex mb-3">
+                                <div class="timeline-icon me-3">
+                                    <i class="fas fa-circle text-primary" style="font-size: 12px;"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">{{ activity.action }}</p>
+                                    <small class="text-muted">{{ activity.timestamp|timesince }} ago</small>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted text-center">No recent activity</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline-item {
+    border-left: 2px solid #007bff;
+    padding-left: 15px;
+    position: relative;
+}
+.timeline-icon {
+    position: absolute;
+    left: -8px;
+    top: 0;
+}
+</style>
+{% endblock %}
