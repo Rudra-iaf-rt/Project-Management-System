@@ -4,6 +4,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from apps.accounts.views import dashboard
 
 # Comment out API imports for now
 # from rest_framework.routers import DefaultRouter
@@ -34,6 +35,7 @@ from django.contrib.auth import views as auth_views
 # router.register(r'chat/messages', ChatMessageViewSet, basename='api-chat')
 
 urlpatterns = [
+    path('', dashboard, name='home'),
     path('admin/', admin.site.urls),
     path('', include('apps.accounts.urls')),
     path('projects/', include('apps.projects.urls')),
