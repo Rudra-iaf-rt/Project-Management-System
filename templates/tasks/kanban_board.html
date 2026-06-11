@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kanban Board - Task Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kanban-container {
+        padding: 20px;
+    }
+    
+    .kanban-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    
+    .kanban-board {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding: 10px 0;
+        min-height: 500px;
+    }
+    
+    .kanban-column {
+        min-width: 320px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .column-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        color: white;
+    }
+    
+    .column-header h5 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .column-header .task-count {
+        background: rgba(255,255,255,0.3);
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+    
+    .task-list {
+        min-height: 400px;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .task-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        cursor: grab;
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+    }
+    
+    .task-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .task-card:active {
+        cursor: grabbing;
+    }
+    
+    .task-card.dragging {
+        opacity: 0.5;
+    }
+    
+    .task-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2c3e50;
+    }
+    
+    .task-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        font-size: 12px;
+    }
+    
+    .priority {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    .priority-high { background: #fee2e2; color: #dc2626; border-left-color: #dc2626; }
+    .priority-medium { background: #fef3c7; color: #d97706; border-left-color: #d97706; }
+    .priority-low { background: #dcfce7; color: #16a34a; border-left-color: #16a34a; }
+    
+    .task-assignee {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .task-assignee img {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .due-date {
+        font-size: 11px;
+        color: #6c757d;
+    }
+    
+    .due-date.overdue {
+        color: #dc2626;
+        font-weight: 600;
+    }
+    
+    .progress-bar {
+        height: 4px;
+        background: #e5e7eb;
+        border-radius: 2px;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+    
+    .progress {
+        height: 100%;
+        background: #10b981;
+        border-radius: 2px;
+        transition: width 0.3s;
+    }
+    
+    /* Column header colors */
+    .bg-pending { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .bg-progress { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .bg-testing { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .bg-completed { background: linear-gradient(135deg, #10b981, #059669); }
+    
+    @media (max-width: 768px) {
+        .kanban-column {
+            min-width: 280px;
+        }
+        
+        .kanban-board {
+            gap: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kanban-container">
+    <div class="kanban-header">
+        <h2><i class="fas fa-columns"></i> Kanban Board</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <i class="fas fa-plus"></i> Add Task
+        </button>
+    </div>
+    
+    <div class="kanban-board">
+        <!-- Pending Column -->
+        <div class="kanban-column">
+            <div class="column-header bg-pending">
+                <h5><i class="fas fa-hourglass-start"></i> Pending</h5>
+                <span class="task-count">{{ pending_tasks|length }}</span>
+            </div>
+            <div class="task-list" data-status="PENDING" id="pending-list">
+                {% for task in pending_tasks %}
+                <div class="task-card priority-{{ task.priority|lower }}" data-task-id="{{ task.id }}" draggable="true">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-meta">
+                        <span class="priority priority-{{ task.priority|lower }}">
+                            <i class="fas fa-{% if task.priority == 'HIGH' %}exclamation-circle{% elif task.priority == 'MEDIUM' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+                            {{ task.get_priority_display }}
+                        </span>
+                        <span class="due-date {% if task.is_overdue %}overdue{% endif %}">
+                            <i class="far fa-calendar-alt"></i> {{ task.deadline|date:"M d" }}
+                        </span>
+                    </div>
+                    <div class="task-assignee">
+                        <i class="fas fa-user-circle"></i>
+                        <span>{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                    </div>
+                    {% if task.project %}
+                    <div class="task-assignee">
+                        <i class="fas fa-folder"></i>
+                        <span>{{ task.project.name|truncatechars:20 }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="text-center text-muted p-4">
+                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                    No tasks
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- In Progress Column -->
+        <div class="kanban-column">
+            <div class="column-header bg-progress">
+                <h5><i class="fas fa-spinner fa-pulse"></i> In Progress</h5>
+                <span class="task-count">{{ in_progress_tasks|length }}</span>
+            </div>
+            <div class="task-list" data-status="IN_PROGRESS" id="progress-list">
+                {% for task in in_progress_tasks %}
+                <div class="task-card priority-{{ task.priority|lower }}" data-task-id="{{ task.id }}" draggable="true">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-meta">
+                        <span class="priority priority-{{ task.priority|lower }}">
+                            <i class="fas fa-{% if task.priority == 'HIGH' %}exclamation-circle{% elif task.priority == 'MEDIUM' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+                            {{ task.get_priority_display }}
+                        </span>
+                        <span class="due-date {% if task.is_overdue %}overdue{% endif %}">
+                            <i class="far fa-calendar-alt"></i> {{ task.deadline|date:"M d" }}
+                        </span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: 0%"></div>
+                    </div>
+                    <div class="task-assignee">
+                        <i class="fas fa-user-circle"></i>
+                        <span>{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted p-4">
+                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                    No tasks
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Testing Column -->
+        <div class="kanban-column">
+            <div class="column-header bg-testing">
+                <h5><i class="fas fa-vial"></i> Testing</h5>
+                <span class="task-count">{{ testing_tasks|length }}</span>
+            </div>
+            <div class="task-list" data-status="TESTING" id="testing-list">
+                {% for task in testing_tasks %}
+                <div class="task-card priority-{{ task.priority|lower }}" data-task-id="{{ task.id }}" draggable="true">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-meta">
+                        <span class="priority priority-{{ task.priority|lower }}">
+                            {{ task.get_priority_display }}
+                        </span>
+                    </div>
+                    <div class="task-assignee">
+                        <i class="fas fa-user-circle"></i>
+                        <span>{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted p-4">
+                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                    No tasks
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Completed Column -->
+        <div class="kanban-column">
+            <div class="column-header bg-completed">
+                <h5><i class="fas fa-check-circle"></i> Completed</h5>
+                <span class="task-count">{{ completed_tasks|length }}</span>
+            </div>
+            <div class="task-list" data-status="COMPLETED" id="completed-list">
+                {% for task in completed_tasks %}
+                <div class="task-card priority-{{ task.priority|lower }}" data-task-id="{{ task.id }}" draggable="true">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-meta">
+                        <span class="priority priority-{{ task.priority|lower }}">
+                            {{ task.get_priority_display }}
+                        </span>
+                        <span class="due-date">
+                            <i class="fas fa-check-circle text-success"></i> Done
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted p-4">
+                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                    No tasks
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickTaskForm" method="post" action="{% url 'task_create' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Task Title</label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Project</label>
+                        <select name="project" class="form-control" required>
+                            <option value="">Select Project</option>
+                            {% for project in user_projects %}
+                                <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Priority</label>
+                        <select name="priority" class="form-control">
+                            <option value="HIGH">High</option>
+                            <option value="MEDIUM" selected>Medium</option>
+                            <option value="LOW">Low</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deadline</label>
+                        <input type="datetime-local" name="deadline" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="quickTaskForm" class="btn btn-primary">Create Task</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Drag and drop functionality
+    const taskCards = document.querySelectorAll('.task-card');
+    const taskLists = document.querySelectorAll('.task-list');
+    
+    taskCards.forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', card.dataset.taskId);
+            card.classList.add('dragging');
+        });
+        
+        card.addEventListener('dragend', (e) => {
+            card.classList.remove('dragging');
+        });
+    });
+    
+    taskLists.forEach(list => {
+        list.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        
+        list.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            const taskId = e.dataTransfer.getData('text/plain');
+            const newStatus = list.dataset.status;
+            
+            if (!taskId || !newStatus) return;
+            
+            // Update task status via AJAX
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            
+            try {
+                const response = await fetch(`/tasks/${taskId}/update-status/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to update task status');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i =0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

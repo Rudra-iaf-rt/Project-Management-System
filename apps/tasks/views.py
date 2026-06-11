@@ -155,3 +155,31 @@ def update_task_status(request, pk):
             return JsonResponse({'success': True})
     
     return JsonResponse({'success': False}, status=400)
+
+    # apps/tasks/views.py
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Task
+
+@login_required
+def kanban_board(request):
+    """Kanban board view for task management"""
+    user = request.user
+    
+    # Get tasks based on user role
+    if user.role == 'SUPER_ADMIN':
+        tasks = Task.objects.all()
+    elif user.role == 'PROJECT_MANAGER':
+        tasks = Task.objects.filter(project__project_manager=user)
+    else:  # EMPLOYEE
+        tasks = Task.objects.filter(assigned_to=user)
+    
+    # Organize tasks by status
+    context = {
+        'pending_tasks': tasks.filter(status='PENDING'),
+        'in_progress_tasks': tasks.filter(status='IN_PROGRESS'),
+        'testing_tasks': tasks.filter(status='TESTING'),
+        'completed_tasks': tasks.filter(status='COMPLETED'),
+    }
+    
+    return render(request, 'tasks/kanban_board.html', context)

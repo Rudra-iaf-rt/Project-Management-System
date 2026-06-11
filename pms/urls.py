@@ -5,6 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from apps.accounts.views import dashboard
+from apps.tasks.views import kanban_board
 
 # Comment out API imports for now
 # from rest_framework.routers import DefaultRouter
@@ -37,6 +38,7 @@ from apps.accounts.views import dashboard
 urlpatterns = [
     path('', dashboard, name='dashboard'),  # Changed from 'home' to 'dashboard'
     path('home/', dashboard, name='home'),
+    path('kanban/', kanban_board, name='kanban_board'),
     path('login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('admin/', admin.site.urls),
