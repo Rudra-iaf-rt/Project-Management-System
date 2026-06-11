@@ -9,6 +9,11 @@
     --light: #f8f9fa;
 }
 
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fb;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -18,7 +23,7 @@
 /* Sidebar Styles */
 .sidebar {
     width: 280px;
-    background: var(--dark);
+    background: #1a1a2e;
     color: white;
     position: fixed;
     height: 100vh;
@@ -217,6 +222,25 @@
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 12px;
+}
+
+/* Auth Container */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.auth-card {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 450px;
 }
 
 /* Responsive */
