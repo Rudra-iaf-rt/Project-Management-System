@@ -44,8 +44,8 @@
             <a href="{% url 'kanban_board' %}" class="menu-item">
                 <i class="fas fa-columns"></i> Kanban Board
             </a>
-            <a href="{% url 'chat_room' %}" class="menu-item">
-                <i class="fas fa-comments"></i> Team Chat
+            <a href="{% url 'chat_room' team_id=1 %}" class="menu-item">
+                <i class="fas fa-comments"></i> <span>Chat</span>
             </a>
             <a href="{% url 'file_list' %}" class="menu-item">
                 <i class="fas fa-file-alt"></i> Files
