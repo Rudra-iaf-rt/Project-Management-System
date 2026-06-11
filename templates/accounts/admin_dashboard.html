@@ -1,183 +1,294 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Admin Dashboard - Project Management System{% endblock %}
+{% block title %}Dashboard - Project Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dashboard specific styles */
+    .dashboard-container {
+        padding: 20px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+    }
+    
+    .bg-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .bg-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+    .bg-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .bg-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    
+    .stat-info h3 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .stat-info p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .priority-badge, .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .priority-high { background: #fee2e2; color: #dc2626; }
+    .priority-medium { background: #fef3c7; color: #d97706; }
+    .priority-low { background: #dcfce7; color: #16a34a; }
+    
+    .status-pending { background: #fef3c7; color: #d97706; }
+    .status-in_progress { background: #dbeafe; color: #2563eb; }
+    .status-testing { background: #e0e7ff; color: #4f46e5; }
+    .status-completed { background: #dcfce7; color: #16a34a; }
+    
+    .deadline-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .deadline-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+        transition: background 0.2s;
+    }
+    
+    .deadline-item:hover {
+        background: #f9fafb;
+    }
+    
+    .deadline-info h6 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .deadline-info small {
+        font-size: 12px;
+        color: #6b7280;
+    }
+    
+    .deadline-date {
+        font-size: 13px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: #f3f4f6;
+    }
+    
+    .deadline-date.text-danger {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .card-header {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 16px 20px;
+        border-radius: 16px 16px 0 0 !important;
+    }
+    
+    .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #6b7280;
+        border-top: none;
+    }
+    
+    @media (max-width: 768px) {
+        .stat-card {
+            padding: 15px;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 22px;
+        }
+        
+        .stat-info h3 {
+            font-size: 24px;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Welcome Header -->
-    <div class="welcome-header mb-4">
-        <h1 class="display-5">Welcome, {{ request.user.get_full_name }}</h1>
-        <p class="lead">Super Admin Dashboard - System Overview</p>
-    </div>
-    
+<div class="dashboard-container">
     <!-- Stats Cards -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="stats-card stats-card-primary">
-                <div class="stats-icon">
-                    <i class="fas fa-users fa-2x"></i>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-folder"></i>
                 </div>
-                <div class="stats-info">
-                    <h3>{{ total_users }}</h3>
-                    <p>Total Users</p>
-                </div>
-                <div class="stats-trend">
-                    <span class="text-success">
-                        <i class="fas fa-arrow-up"></i> +12%
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card stats-card-success">
-                <div class="stats-icon">
-                    <i class="fas fa-folder-open fa-2x"></i>
-                </div>
-                <div class="stats-info">
-                    <h3>{{ total_projects }}</h3>
+                <div class="stat-info">
+                    <h3>{{ total_projects|default:"0" }}</h3>
                     <p>Total Projects</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card stats-card-info">
-                <div class="stats-icon">
-                    <i class="fas fa-tasks fa-2x"></i>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-check-circle"></i>
                 </div>
-                <div class="stats-info">
-                    <h3>{{ total_tasks }}</h3>
-                    <p>Total Tasks</p>
+                <div class="stat-info">
+                    <h3>{{ completed_tasks|default:"0" }}</h3>
+                    <p>Completed Tasks</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card stats-card-warning">
-                <div class="stats-icon">
-                    <i class="fas fa-user-tie fa-2x"></i>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-clock"></i>
                 </div>
-                <div class="stats-info">
-                    <h3>{{ total_managers }}</h3>
-                    <p>Project Managers</p>
+                <div class="stat-info">
+                    <h3>{{ pending_tasks|default:"0" }}</h3>
+                    <p>Pending Tasks</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ team_members|default:"0" }}</h3>
+                    <p>Team Members</p>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- System Analytics -->
+    <!-- Charts Row -->
     <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line me-2"></i> Project Progress</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="projectProgressChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie me-2"></i> Task Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="taskDistributionChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activities -->
+    <div class="row g-4">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="fas fa-chart-line"></i> System Activity</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="systemActivityChart" height="300"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-pie"></i> Project Status</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="projectStatusChart" height="250"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Quick Actions -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <a href="{% url 'project_create' %}" class="btn btn-primary w-100">
-                                <i class="fas fa-plus"></i> Create Project
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'task_create' %}" class="btn btn-success w-100">
-                                <i class="fas fa-check-circle"></i> Create Task
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'team_create' %}" class="btn btn-info w-100">
-                                <i class="fas fa-users"></i> Create Team
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-warning w-100" onclick="generateSystemReport()">
-                                <i class="fas fa-chart-bar"></i> Generate Report
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Recent Users and System Logs -->
-    <div class="row g-4">
-        <div class="col-md-7">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-user-plus"></i> Recent Users</h5>
+                    <h5><i class="fas fa-tasks me-2"></i> Recent Tasks</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>User</th>
-                                    <th>Role</th>
-                                    <th>Department</th>
-                                    <th>Joined</th>
+                                    <th>Task</th>
+                                    <th>Project</th>
+                                    <th>Priority</th>
                                     <th>Status</th>
+                                    <th>Deadline</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for user in recent_users %}
+                                {% for task in recent_tasks %}
                                 <tr>
                                     <td>
-                                        <div class="d-flex align-items-center">
-                                            {% if user.profile_picture %}
-                                                <img src="{{ user.profile_picture.url }}" class="rounded-circle me-2" width="30" height="30">
-                                            {% else %}
-                                                <div class="avatar-placeholder bg-secondary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-size: 12px;">
-                                                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
-                                                </div>
-                                            {% endif %}
-                                            <div>
-                                                <strong>{{ user.get_full_name }}</strong><br>
-                                                <small class="text-muted">{{ user.username }}</small>
-                                            </div>
-                                        </div>
+                                        <strong>{{ task.title|truncatechars:30 }}</strong>
                                     </td>
+                                    <td>{{ task.project.name|truncatechars:20 }}</td>
                                     <td>
-                                        <span class="badge bg-{% if user.role == 'SUPER_ADMIN' %}danger{% elif user.role == 'PROJECT_MANAGER' %}warning{% else %}info{% endif %}">
-                                            {{ user.get_role_display }}
+                                        <span class="priority-badge priority-{{ task.priority|lower }}">
+                                            <i class="fas fa-{% if task.priority == 'HIGH' %}exclamation-circle{% elif task.priority == 'MEDIUM' %}exclamation-triangle{% else %}check-circle{% endif %} me-1"></i>
+                                            {{ task.get_priority_display }}
                                         </span>
                                     </td>
-                                    <td>{{ user.department|default:"-" }}</td>
-                                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
                                     <td>
-                                        {% if user.is_active %}
-                                            <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Inactive</span>
-                                        {% endif %}
+                                        <span class="status-badge status-{{ task.status|lower|cut:' ' }}">
+                                            <i class="fas fa-{% if task.status == 'COMPLETED' %}check-circle{% elif task.status == 'IN_PROGRESS' %}spinner fa-pulse{% else %}clock{% endif %} me-1"></i>
+                                            {{ task.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="{% if task.is_overdue %}text-danger fw-bold{% endif %}">
+                                        <i class="far fa-calendar-alt me-1"></i>
+                                        {{ task.deadline|date:"M d, Y" }}
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center">No users found</td>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                        No tasks found
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -187,29 +298,33 @@
             </div>
         </div>
         
-        <div class="col-md-5">
+        <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="fas fa-history"></i> Recent System Activity</h5>
+                    <h5><i class="fas fa-calendar-alt me-2"></i> Upcoming Deadlines</h5>
                 </div>
-                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                    <div class="activity-timeline">
-                        {% for activity in recent_activities %}
-                            <div class="activity-item mb-3 pb-2 border-bottom">
-                                <div class="d-flex">
-                                    <div class="activity-icon me-2">
-                                        <i class="fas fa-user-circle text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0">{{ activity.action }}</p>
-                                        <small class="text-muted">
-                                            {{ activity.user.get_full_name }} • {{ activity.timestamp|timesince }} ago
-                                        </small>
-                                    </div>
-                                </div>
+                <div class="card-body p-0">
+                    <div class="deadline-list">
+                        {% for task in upcoming_deadlines %}
+                        <div class="deadline-item">
+                            <div class="deadline-info">
+                                <h6>{{ task.title|truncatechars:25 }}</h6>
+                                <small>{{ task.project.name }}</small>
                             </div>
+                            <div class="deadline-date {% if task.is_overdue %}text-danger{% endif %}">
+                                {% if task.is_overdue %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                {% else %}
+                                    <i class="far fa-calendar-alt me-1"></i>
+                                {% endif %}
+                                {{ task.deadline|date:"M d" }}
+                            </div>
+                        </div>
                         {% empty %}
-                            <div class="text-center text-muted">No recent activity</div>
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+                            No upcoming deadlines
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -218,130 +333,135 @@
     </div>
 </div>
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// System Activity Chart
-const ctx1 = document.getElementById('systemActivityChart')?.getContext('2d');
-if (ctx1) {
-    new Chart(ctx1, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Projects',
-                data: [12, 19, 3, 5, 2, 3],
-                borderColor: 'rgb(54, 162, 235)',
-                backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                tension: 0.4
-            }, {
-                label: 'Tasks',
-                data: [45, 52, 38, 47, 42, 56],
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                tension: 0.4
-            }, {
-                label: 'Users',
-                data: [30, 35, 42, 48, 55, 62],
-                borderColor: 'rgb(255, 159, 64)',
-                backgroundColor: 'rgba(255, 159, 64, 0.1)',
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
+    document.addEventListener('DOMContentLoaded', function() {
+        // Project Progress Chart
+        const ctx1 = document.getElementById('projectProgressChart');
+        if (ctx1 && {{ project_names|safe }} && {{ project_progress|safe }}) {
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: {{ project_names|safe }},
+                    datasets: [{
+                        label: 'Progress (%)',
+                        data: {{ project_progress|safe }},
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Progress: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Completion Percentage (%)',
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
                 }
-            }
+            });
+        } else if (ctx1) {
+            ctx1.parentElement.innerHTML = '<div class="alert alert-info text-center">No project data available</div>';
+        }
+        
+        // Task Distribution Chart
+        const ctx2 = document.getElementById('taskDistributionChart');
+        if (ctx2 && {{ task_status_counts|safe }}) {
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'In Progress', 'Testing', 'Completed'],
+                    datasets: [{
+                        data: {{ task_status_counts|safe }},
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.raw / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.raw} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        } else if (ctx2) {
+            ctx2.parentElement.innerHTML = '<div class="alert alert-info text-center">No task data available</div>';
         }
     });
-}
-
-// Project Status Chart
-const ctx2 = document.getElementById('projectStatusChart')?.getContext('2d');
-if (ctx2 && {{ system_stats.projects_by_status|safe }}) {
-    const statusData = {{ system_stats.projects_by_status|safe }};
-    new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-            labels: ['Pending', 'In Progress', 'Completed', 'On Hold'],
-            datasets: [{
-                data: statusData,
-                backgroundColor: [
-                    '#dc3545',
-                    '#ffc107',
-                    '#28a745',
-                    '#6c757d'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-}
-
-function generateSystemReport() {
-    window.location.href = "{% url 'project_report' %}";
-}
 </script>
-
-<style>
-.stats-card {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    transition: transform 0.3s;
-}
-.stats-card:hover {
-    transform: translateY(-5px);
-}
-.stats-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.stats-card-primary .stats-icon {
-    background: rgba(13, 110, 253, 0.1);
-    color: #0d6efd;
-}
-.stats-card-success .stats-icon {
-    background: rgba(25, 135, 84, 0.1);
-    color: #198754;
-}
-.stats-card-info .stats-icon {
-    background: rgba(13, 202, 240, 0.1);
-    color: #0dcaf0;
-}
-.stats-card-warning .stats-icon {
-    background: rgba(255, 193, 7, 0.1);
-    color: #ffc107;
-}
-.stats-info h3 {
-    margin: 0;
-    font-size: 28px;
-}
-.stats-info p {
-    margin: 0;
-    color: #6c757d;
-    font-size: 14px;
-}
-.avatar-placeholder {
-    font-weight: bold;
-}
-</style>
+{% endblock %}
 {% endblock %}
