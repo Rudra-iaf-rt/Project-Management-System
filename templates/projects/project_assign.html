@@ -29,7 +29,7 @@
                             <div class="current-members">
                                 {% for member in project.team_members.all %}
                                     <span class="badge bg-primary me-2 mb-2 p-2">
-                                        {{ member.get_full_name }}
+                                        {{ member.get_full_name|default:member.username }}
                                         <a href="{% url 'project_remove_member' project.id member.id %}" class="text-white ms-2" onclick="return confirm('Remove this member?')">
                                             <i class="fas fa-times"></i>
                                         </a>
@@ -44,7 +44,7 @@
                             <label class="form-label">Add New Members</label>
                             <select name="members" class="form-control" multiple size="10">
                                 {% for user in available_users %}
-                                    <option value="{{ user.id }}">{{ user.get_full_name }} ({{ user.designation|default:"Employee" }})</option>
+                                    <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }} ({{ user.designation|default:"Employee" }})</option>
                                 {% endfor %}
                             </select>
                             <small class="text-muted">Hold Ctrl to select multiple members</small>

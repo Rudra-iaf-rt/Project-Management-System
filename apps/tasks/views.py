@@ -7,6 +7,7 @@ from django.db.models import Q
 from .models import Task
 from .forms import TaskForm, TaskUpdateForm
 from apps.notifications.utils import send_task_notification
+from django.http import JsonResponse
 
 @login_required
 def task_list(request):

@@ -1,5 +1,6 @@
 import io
 from datetime import datetime, timedelta
+from django.utils import timezone
 from django.db.models import Count, Sum, Avg
 from openpyxl import Workbook
 from reportlab.lib.pagesizes import letter
@@ -11,7 +12,7 @@ from apps.accounts.models import User
 
 def get_dashboard_stats():
     """Get statistics for dashboard"""
-    today = datetime.now().date()
+    today = timezone.now().date()
     week_ago = today - timedelta(days=7)
     
     stats = {
@@ -21,7 +22,7 @@ def get_dashboard_stats():
         'total_tasks': Task.objects.count(),
         'completed_tasks': Task.objects.filter(status='COMPLETED').count(),
         'pending_tasks': Task.objects.filter(status='PENDING').count(),
-        'overdue_tasks': Task.objects.filter(deadline__lt=datetime.now(), status__in=['PENDING', 'IN_PROGRESS']).count(),
+        'overdue_tasks': Task.objects.filter(deadline__lt=timezone.now(), status__in=['PENDING', 'IN_PROGRESS']).count(),
         'total_users': User.objects.count(),
         'active_users': User.objects.filter(is_active=True).count(),
         'new_projects_week': Project.objects.filter(created_at__gte=week_ago).count(),

@@ -30,8 +30,17 @@
                         </span>
                     </div>
                     <div class="task-assignee">
-                        <img src="{{ task.assigned_to.profile_picture.url|default:'https://via.placeholder.com/30' }}" alt="">
-                        <span>{{ task.assigned_to.username }}</span>
+                        {% if task.assigned_to %}
+                            {% if task.assigned_to.profile_picture %}
+                                <img src="{{ task.assigned_to.profile_picture.url }}" alt="">
+                            {% else %}
+                                <img src="https://via.placeholder.com/30" alt="">
+                            {% endif %}
+                            <span>{{ task.assigned_to.username }}</span>
+                        {% else %}
+                            <img src="https://via.placeholder.com/30" alt="">
+                            <span>Unassigned</span>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}

@@ -34,8 +34,8 @@ class TasksTestCase(TestCase):
             name='Test Project',
             description='Test project description',
             project_code='TEST-001',
-            start_date=datetime.now().date(),
-            end_date=datetime.now().date() + timedelta(days=30),
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date() + timedelta(days=30),
             priority='MEDIUM',
             status='PENDING',
             budget=50000,
@@ -52,7 +52,7 @@ class TasksTestCase(TestCase):
             assigned_by=self.manager,
             priority='HIGH',
             status='PENDING',
-            deadline=datetime.now() + timedelta(days=7),
+            deadline=timezone.now() + timedelta(days=7),
             estimated_hours=8
         )
     
@@ -73,7 +73,7 @@ class TasksTestCase(TestCase):
             assigned_to=self.employee,
             assigned_by=self.manager,
             status='PENDING',
-            deadline=datetime.now() - timedelta(days=1),
+            deadline=timezone.now() - timedelta(days=1),
             estimated_hours=4
         )
         
@@ -103,7 +103,7 @@ class TasksTestCase(TestCase):
             'project': self.project.id,
             'assigned_to': self.employee.id,
             'priority': 'MEDIUM',
-            'deadline': (datetime.now() + timedelta(days=10)).strftime('%Y-%m-%d %H:%M'),
+            'deadline': (timezone.now() + timedelta(days=10)).strftime('%Y-%m-%d %H:%M'),
             'estimated_hours': 6
         })
         self.assertEqual(response.status_code, 302)  # Redirect after creation
@@ -130,7 +130,7 @@ class TasksTestCase(TestCase):
             assigned_by=self.manager,
             priority='LOW',
             status='PENDING',
-            deadline=datetime.now() + timedelta(days=5)
+            deadline=timezone.now() + timedelta(days=5)
         )
         
         from apps.notifications.models import Notification

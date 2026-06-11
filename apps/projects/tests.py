@@ -2,6 +2,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.utils import timezone
 from datetime import datetime, timedelta
 from apps.projects.models import Project
 from apps.tasks.models import Task
@@ -39,8 +40,8 @@ class ProjectsTestCase(TestCase):
             name='Test Project',
             description='This is a test project',
             project_code='TEST-001',
-            start_date=datetime.now().date(),
-            end_date=datetime.now().date() + timedelta(days=30),
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date() + timedelta(days=30),
             priority='HIGH',
             status='PENDING',
             budget=50000,
@@ -65,7 +66,7 @@ class ProjectsTestCase(TestCase):
             assigned_to=self.employee,
             assigned_by=self.manager,
             status='COMPLETED',
-            deadline=datetime.now() + timedelta(days=7)
+            deadline=timezone.now() + timedelta(days=7)
         )
         
         Task.objects.create(
@@ -75,7 +76,7 @@ class ProjectsTestCase(TestCase):
             assigned_to=self.employee,
             assigned_by=self.manager,
             status='PENDING',
-            deadline=datetime.now() + timedelta(days=14)
+            deadline=timezone.now() + timedelta(days=14)
         )
         
         self.assertEqual(self.project.progress, 50)  # 1 of 2 tasks completed
@@ -101,8 +102,8 @@ class ProjectsTestCase(TestCase):
             'name': 'New Project',
             'description': 'New project description',
             'project_code': 'NEW-001',
-            'start_date': datetime.now().date(),
-            'end_date': datetime.now().date() + timedelta(days=60),
+            'start_date': timezone.now().date(),
+            'end_date': timezone.now().date() + timedelta(days=60),
             'priority': 'MEDIUM',
             'status': 'PENDING',
             'budget': 75000,

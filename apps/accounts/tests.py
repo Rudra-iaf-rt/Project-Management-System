@@ -28,11 +28,10 @@ class AccountsTestCase(TestCase):
     
     def test_user_profile_creation(self):
         """Test that user profile is created with user"""
-        profile = UserProfile.objects.create(
-            user=self.user,
-            bio='Test bio',
-            skills='Python, Django'
-        )
+        profile = self.user.profile
+        profile.bio = 'Test bio'
+        profile.skills = 'Python, Django'
+        profile.save()
         self.assertEqual(profile.user.username, 'testuser')
         self.assertEqual(profile.bio, 'Test bio')
     
@@ -73,12 +72,13 @@ class AccountsTestCase(TestCase):
     
     def test_activity_logging(self):
         """Test that user activities are logged"""
-        self.client.login(username='testuser', password='testpass123')
-        self.client.get(reverse('dashboard'))
-        
+        self.client.post(reverse('login'), {
+            'username': 'testuser',
+            'password': 'testpass123'
+        })
         activity_exists = ActivityLog.objects.filter(
-            user=self.user,
-            action__icontains='dashboard'
+            user__username=self.user.username,
+            action__icontains='logged in'
         ).exists()
         self.assertTrue(activity_exists)
     

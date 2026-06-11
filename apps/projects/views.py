@@ -6,6 +6,7 @@ from django.db.models import Q
 from .models import Project
 from .forms import ProjectForm
 from apps.tasks.models import Task
+from apps.accounts.models import User
 
 @login_required
 def project_list(request):
@@ -70,12 +71,15 @@ def project_detail(request, pk):
         'completed': tasks.filter(status='COMPLETED').count(),
     }
     
+    can_edit = request.user.role == 'SUPER_ADMIN' or request.user == project.project_manager
+    
     context = {
         'project': project,
         'tasks': tasks[:10],
         'task_stats': task_stats,
         'team_members': project.team_members.all(),
         'progress': project.progress,
+        'can_edit': can_edit,
     }
     return render(request, 'projects/project_detail.html', context)
 
@@ -137,3 +141,48 @@ def project_delete(request, pk):
         return redirect('project_list')
     
     return render(request, 'projects/project_delete.html', {'project': project})
+
+@login_required
+def project_assign(request, pk):
+    """Assign team members to project"""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check permissions (only super admin or project manager can assign)
+    if request.user.role not in ['SUPER_ADMIN'] and request.user != project.project_manager:
+        messages.error(request, 'You do not have permission to manage members for this project.')
+        return redirect('project_detail', pk=project.pk)
+    
+    if request.method == 'POST':
+        member_ids = request.POST.getlist('members')
+        # Add new members
+        for m_id in member_ids:
+            try:
+                user = User.objects.get(id=m_id, role='EMPLOYEE')
+                project.team_members.add(user)
+            except User.DoesNotExist:
+                pass
+        messages.success(request, 'Members added successfully!')
+        return redirect('project_assign', pk=project.pk)
+        
+    # Get users who are employees, and not already in team_members
+    available_users = User.objects.filter(role='EMPLOYEE').exclude(id__in=project.team_members.all())
+    
+    context = {
+        'project': project,
+        'available_users': available_users,
+    }
+    return render(request, 'projects/project_assign.html', context)
+
+@login_required
+def project_remove_member(request, project_id, member_id):
+    """Remove team member from project"""
+    project = get_object_or_404(Project, pk=project_id)
+    
+    if request.user.role not in ['SUPER_ADMIN'] and request.user != project.project_manager:
+        messages.error(request, 'You do not have permission to manage members for this project.')
+        return redirect('project_detail', pk=project.pk)
+        
+    member = get_object_or_404(User, id=member_id)
+    project.team_members.remove(member)
+    messages.success(request, f'Member "{member.get_full_name()}" removed successfully!')
+    return redirect('project_assign', pk=project.pk)

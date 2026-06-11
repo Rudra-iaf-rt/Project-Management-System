@@ -58,8 +58,9 @@ def send_password_reset_email(user_id, reset_link):
 @shared_task
 def cleanup_inactive_users():
     """Deactivate users who haven't logged in for 90 days"""
-    from datetime import datetime, timedelta
-    threshold_date = datetime.now() - timedelta(days=90)
+    from datetime import timedelta
+    from django.utils import timezone
+    threshold_date = timezone.now() - timedelta(days=90)
     inactive_users = User.objects.filter(
         last_login__lt=threshold_date,
         is_active=True

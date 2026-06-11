@@ -50,7 +50,7 @@
             <a href="{% url 'file_list' %}" class="menu-item">
                 <i class="fas fa-file-alt"></i> Files
             </a>
-            <a href="{% url 'reports' %}" class="menu-item">
+            <a href="{% url 'reports_dashboard' %}" class="menu-item">
                 <i class="fas fa-chart-bar"></i> Reports
             </a>
         </div>
@@ -72,7 +72,11 @@
                 </div>
                 
                 <div class="user-dropdown">
-                    <img src="{{ request.user.profile_picture.url|default:'https://via.placeholder.com/40' }}" alt="User">
+                    {% if request.user.profile_picture %}
+                        <img src="{{ request.user.profile_picture.url }}" alt="User">
+                    {% else %}
+                        <img src="https://via.placeholder.com/40" alt="User">
+                    {% endif %}
                     <span>{{ request.user.username }}</span>
                     <i class="fas fa-chevron-down"></i>
                     <div class="dropdown-menu">

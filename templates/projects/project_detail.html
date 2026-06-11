@@ -134,8 +134,13 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5>Team Members</h5>
+                    {% if can_edit %}
+                        <a href="{% url 'project_assign' project.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-user-plus"></i> Manage Members
+                        </a>
+                    {% endif %}
                 </div>
                 <div class="card-body">
                     <div class="row">

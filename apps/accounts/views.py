@@ -7,6 +7,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.http import JsonResponse
 from django.db.models import Count, Q
 from datetime import datetime, timedelta
+from django.utils import timezone
 from .models import User, UserProfile, ActivityLog
 from .forms import UserRegisterForm, UserProfileForm, UserUpdateForm
 # Fix: Import Task from tasks app, not projects
@@ -73,12 +74,12 @@ def dashboard(request):
         'upcoming_deadlines': Task.objects.filter(
             assigned_to=user,
             status__in=['PENDING', 'IN_PROGRESS'],
-            deadline__gte=datetime.now()
+            deadline__gte=timezone.now()
         ).order_by('deadline')[:5],
         'overdue_tasks': Task.objects.filter(
             assigned_to=user,
             status__in=['PENDING', 'IN_PROGRESS'],
-            deadline__lt=datetime.now()
+            deadline__lt=timezone.now()
         ).count(),
         'recent_activities': ActivityLog.objects.filter(user=user)[:10],
     }

@@ -28,11 +28,12 @@ class ProjectFile(models.Model):
         return self.filename.split('.')[-1].upper() if '.' in self.filename else 'UNKNOWN'
     
     def get_file_size_display(self):
+        size = float(self.file_size)
         for unit in ['B', 'KB', 'MB', 'GB']:
-            if self.file_size < 1024.0:
-                return f"{self.file_size:.1f} {unit}"
-            self.file_size /= 1024.0
-        return f"{self.file_size:.1f} TB"
+            if size < 1024.0:
+                return f"{size:.1f} {unit}"
+            size /= 1024.0
+        return f"{size:.1f} TB"
     
     class Meta:
         ordering = ['-uploaded_at']

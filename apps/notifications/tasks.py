@@ -1,12 +1,13 @@
 # apps/notifications/tasks.py
 from celery import shared_task
 from apps.notifications.models import Notification
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 
 @shared_task
 def cleanup_old_notifications():
     """Delete notifications older than 30 days"""
-    threshold_date = datetime.now() - timedelta(days=30)
+    threshold_date = timezone.now() - timedelta(days=30)
     old_notifications = Notification.objects.filter(created_at__lt=threshold_date)
     count = old_notifications.count()
     old_notifications.delete()

@@ -1,12 +1,16 @@
-# apps/projects/tasks.py
 from celery import shared_task
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.html import strip_tags
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from datetime import timedelta
 from apps.projects.models import Project
 from apps.tasks.models import Task
 from apps.notifications.models import Notification
+
+User = get_user_model()
 
 @shared_task
 def check_deadline_reminders():
@@ -74,10 +78,9 @@ def update_project_progress():
 @shared_task
 def generate_weekly_project_report():
     """Generate and send weekly project report to managers"""
-    from django.db.models import Count, Q
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     
-    one_week_ago = datetime.now() - timedelta(days=7)
+    one_week_ago = timezone.now() - timedelta(days=7)
     
     # Get project managers
     managers = User.objects.filter(role='PROJECT_MANAGER')
