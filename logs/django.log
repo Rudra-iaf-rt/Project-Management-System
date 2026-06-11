@@ -76,3 +76,100 @@ ERROR 2026-06-10 14:08:53,947 basehttp 30768 6464 You're accessing the developme
 ERROR 2026-06-10 14:08:54,199 basehttp 30768 12184 You're accessing the development server over HTTPS, but it only supports HTTP.
 ERROR 2026-06-10 14:51:35,205 basehttp 5436 8176 You're accessing the development server over HTTPS, but it only supports HTTP.
 ERROR 2026-06-10 14:51:35,211 basehttp 5436 26516 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2026-06-11 20:16:01,031 log 31632 14132 Internal Server Error: /api/tasks/1/log_time/
+Traceback (most recent call last):
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\apps\tasks\api.py", line 85, in log_time
+    task.actual_hours += hours
+TypeError: unsupported operand type(s) for +=: 'decimal.Decimal' and 'float'
+ERROR 2026-06-11 20:20:30,939 log 31996 20964 Internal Server Error: /api/calendar/events/
+Traceback (most recent call last):
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\apps\calendar\api.py", line 33, in list
+    for task in tasks:
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\query.py", line 398, in __iter__
+    self._fetch_all()
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1549, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 764, in as_sql
+    self.compile(self.where) if self.where is not None else ("", [])
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 546, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\sql\where.py", line 145, in as_sql
+    sql, params = compiler.compile(child)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 546, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\lookups.py", line 225, in as_sql
+    rhs_sql, rhs_params = self.process_rhs(compiler, connection)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\lookups.py", line 284, in process_rhs
+    return self.batch_process_rhs(compiler, connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\lookups.py", line 297, in batch_process_rhs
+    pre_processed = super().batch_process_rhs(compiler, connection, rhs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\lookups.py", line 65, in batch_process_rhs
+    _, params = self.get_db_prep_lookup(rhs, connection)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\lookups.py", line 252, in get_db_prep_lookup
+    [get_db_prep_value(v, connection, prepared=True) for v in value]
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 1608, in get_db_prep_value
+    return connection.ops.adapt_datetimefield_value(value)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\G Rudra\OneDrive\Desktop\pms_project\venv\Lib\site-packages\django\db\backends\sqlite3\operations.py", line 273, in adapt_datetimefield_value
+    raise ValueError(
+ValueError: SQLite backend does not support timezone-aware datetimes when USE_TZ is False.

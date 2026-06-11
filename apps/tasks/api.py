@@ -81,11 +81,12 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Response({'error': 'hours is required'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            hours = float(hours)
+            from decimal import Decimal, InvalidOperation
+            hours = Decimal(str(hours))
             task.actual_hours += hours
             task.save()
             return Response({'success': True, 'actual_hours': task.actual_hours})
-        except ValueError:
+        except (ValueError, InvalidOperation):
             return Response({'error': 'Invalid hours value'}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'])
@@ -111,7 +112,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         new_deadline = request.data.get('deadline')
         if not new_deadline:
             return Response({'error': 'deadline required'}, status=status.HTTP_400_BAD_REQUEST)
-        from dateutil import parser
-        task.deadline = parser.isoparse(new_deadline)
+        from django.utils.dateparse import parse_datetime
+        parsed_date = parse_datetime(new_deadline)
+        if not parsed_date:
+            return Response({'error': 'Invalid datetime format'}, status=status.HTTP_400_BAD_REQUEST)
+        task.deadline = parsed_date
         task.save()
         return Response({'success': True, 'deadline': task.deadline.isoformat()})

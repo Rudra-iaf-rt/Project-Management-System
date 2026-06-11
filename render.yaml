@@ -2,9 +2,8 @@ services:
   - type: web
     name: pms-app
     runtime: python
-    repo: https://github.com/Rudra-iaf-rt/Project-Management-System.git  # Change this
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: ./build.sh
     startCommand: daphne -b 0.0.0.0 -p $PORT pms.asgi:application
     envVars:
       - key: DATABASE_URL

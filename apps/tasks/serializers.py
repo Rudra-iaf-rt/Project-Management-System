@@ -1,7 +1,6 @@
 # apps/tasks/serializers.py
 from rest_framework import serializers
 from .models import Task
-from apps.projects.serializers import ProjectSerializer
 from apps.accounts.serializers import UserSerializer
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -13,4 +12,4 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
-        read_only_fields = ['id', 'created_at', 'updated_at', 'completed_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'completed_at', 'assigned_by']

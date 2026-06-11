@@ -19,4 +19,4 @@ class TeamSerializer(serializers.ModelSerializer):
         model = Team
         fields = ['id', 'name', 'description', 'team_lead', 'team_lead_name', 
                   'members', 'member_count', 'roles', 'created_at', 'updated_at']
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'team_lead']
