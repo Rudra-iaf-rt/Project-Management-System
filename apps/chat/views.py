@@ -50,3 +50,10 @@ def send_message_api(request):
         })
     
     return JsonResponse({'success': False}, status=400)
+
+# apps/chat/views.py - Add this function
+@login_required
+def chat_index(request):
+    """Show list of teams to chat with"""
+    teams = Team.objects.filter(members=request.user)
+    return render(request, 'chat/chat_index.html', {'teams': teams})

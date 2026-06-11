@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Select a Team to Chat</h2>
+    <div class="row mt-4">
+        {% for team in teams %}
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'chat_room' team_id=team.id %}" class="text-decoration-none">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">{{ team.name }}</h5>
+                        <p class="card-text text-muted">
+                            {{ team.members.count }} members
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">You are not a member of any team.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

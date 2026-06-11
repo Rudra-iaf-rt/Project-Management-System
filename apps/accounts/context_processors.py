@@ -2,6 +2,7 @@
 from apps.notifications.models import Notification
 from apps.projects.models import Project
 from apps.tasks.models import Task
+from apps.teams.models import Team
 
 def notifications_count(request):
     """Add unread notifications count to all templates"""
@@ -51,3 +52,10 @@ def site_settings(request):
         'SITE_NAME': getattr(settings, 'SITE_NAME', 'Project Management System'),
         'SITE_URL': getattr(settings, 'SITE_URL', 'http://localhost:8000'),
     }
+
+def user_teams(request):
+    """Add user's teams to all templates"""
+    if request.user.is_authenticated:
+        teams = Team.objects.filter(members=request.user)
+        return {'user_teams': teams}
+    return {'user_teams': []}
