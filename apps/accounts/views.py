@@ -13,6 +13,7 @@ from .forms import UserRegisterForm, UserProfileForm, UserUpdateForm
 from apps.projects.models import Project
 from apps.tasks.models import Task  # Changed this line
 from django.core.paginator import Paginator
+from apps.accounts.views import login_view
 
 def login_view(request):
     if request.user.is_authenticated:

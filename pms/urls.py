@@ -45,6 +45,9 @@ urlpatterns = [
     path('notifications/', include('apps.notifications.urls')),
     path('chat/', include('apps.chat.urls')),
     path('reports/', include('apps.reports.urls')),
+    # Add Django's authentication URLs
+    path('login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     
     # Password reset routes
     path('password-reset/',
