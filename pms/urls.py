@@ -4,7 +4,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from apps.accounts.views import dashboard, login_view, logout_view, register_view
+from apps.accounts.views import dashboard, login_view, logout_view, register_view, dashboard_stats_api, dashboard_task_stats_api
 from apps.tasks.views import kanban_board
 
 # API imports
@@ -59,6 +59,8 @@ urlpatterns = [
 
 # API URLs
 urlpatterns += [
+    path('api/dashboard/stats/', dashboard_stats_api, name='dashboard_stats_api'),
+    path('api/dashboard/task-stats/', dashboard_task_stats_api, name='dashboard_task_stats_api'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),

@@ -184,3 +184,50 @@ def admin_dashboard(request):
     }
     
     return render(request, 'accounts/admin_dashboard.html', context)
+
+@login_required
+def dashboard_stats_api(request):
+    """API endpoint for dashboard project progress stats"""
+    user = request.user
+    if user.role == 'SUPER_ADMIN':
+        projects = Project.objects.all()
+    elif user.role == 'PROJECT_MANAGER':
+        projects = Project.objects.filter(project_manager=user)
+    else:
+        projects = Project.objects.filter(team_members=user)
+        
+    projects = projects.distinct()
+    
+    project_names = []
+    project_progress = []
+    
+    for p in projects[:10]:
+        project_names.append(p.name)
+        project_progress.append(p.progress)
+        
+    return JsonResponse({
+        'project_names': project_names,
+        'project_progress': project_progress
+    })
+
+@login_required
+def dashboard_task_stats_api(request):
+    """API endpoint for dashboard task distribution status"""
+    user = request.user
+    if user.role == 'SUPER_ADMIN':
+        tasks = Task.objects.all()
+    elif user.role == 'PROJECT_MANAGER':
+        tasks = Task.objects.filter(project__project_manager=user)
+    else:
+        tasks = Task.objects.filter(assigned_to=user)
+        
+    tasks = tasks.distinct()
+    
+    pending = tasks.filter(status='PENDING').count()
+    in_progress = tasks.filter(status='IN_PROGRESS').count()
+    testing = tasks.filter(status='TESTING').count()
+    completed = tasks.filter(status='COMPLETED').count()
+    
+    return JsonResponse({
+        'task_counts': [pending, in_progress, testing, completed]
+    })

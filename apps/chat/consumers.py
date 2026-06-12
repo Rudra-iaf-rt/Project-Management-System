@@ -61,20 +61,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def save_message(self, username, message):
-        """Save message to database (optional)"""
-        # Uncomment this when your ChatMessage model is ready
-        # from apps.chat.models import ChatMessage
-        # from apps.accounts.models import User
-        # from apps.teams.models import Team
-        # 
-        # try:
-        #     user = User.objects.get(username=username)
-        #     team = Team.objects.get(id=self.team_id)
-        #     ChatMessage.objects.create(
-        #         user=user,
-        #         team=team,
-        #         message=message
-        #     )
-        # except Exception as e:
-        #     print(f"Error saving message: {e}")
-        pass
+        """Save message to database"""
+        from apps.chat.models import ChatMessage
+        from apps.accounts.models import User
+        from apps.teams.models import Team
+        
+        try:
+            user = User.objects.get(username=username)
+            team = Team.objects.get(id=self.team_id)
+            ChatMessage.objects.create(
+                user=user,
+                team=team,
+                message=message
+            )
+        except Exception as e:
+            print(f"Error saving message: {e}")
