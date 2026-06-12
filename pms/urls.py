@@ -4,7 +4,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from apps.accounts.views import dashboard, login_view, logout_view
+from apps.accounts.views import dashboard, login_view, logout_view, register_view
 from apps.tasks.views import kanban_board
 
 # API imports
@@ -41,6 +41,7 @@ urlpatterns = [
     path('kanban/', kanban_board, name='kanban_board'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
+    path('register/', register_view, name='register'),
     path('admin/', admin.site.urls),
     path('profile/', include('apps.accounts.urls')),
     path('projects/', include('apps.projects.urls')),

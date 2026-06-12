@@ -1,109 +1,231 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Register - Project Management System{% endblock %}
-
-{% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="text-center mb-4">
-            <h2>Create Account</h2>
-            <p>Join our Project Management System</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | AuraPMS</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-primary">
+    <div class="auth-wrapper">
+        <!-- Brand / Feature Showcase Panel -->
+        <div class="auth-aside">
+            <div class="auth-aside-content">
+                <div class="mb-5">
+                    <span class="h3 fw-bold text-white d-flex align-items-center gap-2">
+                        <i class="fas fa-cubes font-28"></i> AuraPMS
+                    </span>
+                </div>
+                
+                <h1 class="display-4 fw-extrabold text-white mb-4" style="font-family: 'Outfit', sans-serif;">
+                    The next-gen workspace for team productivity.
+                </h1>
+                
+                <p class="lead text-white-50 mb-5">
+                    Align your engineering and business groups. Plan sprints, track issues, share files, and generate board reports effortlessly.
+                </p>
+                
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="btn-icon bg-white text-indigo-600 rounded-circle">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 text-white font-16">Role-based Workspaces</h5>
+                            <span class="text-white-50 font-14">Tailored dashboards for Super Admins, Project Managers, and Employees.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="btn-icon bg-white text-indigo-600 rounded-circle">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 text-white font-16">Executive Reports & Excel Export</h5>
+                            <span class="text-white-50 font-14">Export beautiful PDF task lists and Excel timeline metrics.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <form method="post">
-            {% csrf_token %}
-            
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-            
-            {% if form.errors %}
-                <div class="alert alert-danger">
-                    <strong>Please correct the following errors:</strong>
-                    <ul>
-                        {% for field, errors in form.errors.items %}
-                            {% for error in errors %}
-                                <li>{{ field|title }}: {{ error }}</li>
+        <!-- Registration Form Panel -->
+        <div class="auth-body">
+            <div class="auth-card card-premium my-4" style="max-width: 520px;">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold" style="font-family: 'Outfit', sans-serif;">Create Account</h2>
+                    <p class="text-muted font-14">Join AuraPMS and set up your profile</p>
+                </div>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show p-2 font-13" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger p-2 font-13">
+                        <strong class="font-13">Correct the following errors:</strong>
+                        <ul class="mb-0 ps-3 mt-1">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field|title }}: {{ error }}</li>
+                                {% endfor %}
                             {% endfor %}
-                        {% endfor %}
-                    </ul>
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-13 fw-semibold">First Name</label>
+                            <input type="text" name="first_name" class="form-control" placeholder="John" required>
+                            <div class="invalid-feedback">First name is required.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-13 fw-semibold">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" placeholder="Doe" required>
+                            <div class="invalid-feedback">Last name is required.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-13 fw-semibold">Username</label>
+                        <input type="text" name="username" class="form-control" placeholder="johndoe" required>
+                        <div class="invalid-feedback">Please enter a unique username.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-13 fw-semibold">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+                    
+                    <!-- Role Card Selection -->
+                    <div class="role-card-group mb-3">
+                        <label class="form-label font-13 fw-semibold">Choose Your Role</label>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="role-card selected text-center py-3" onclick="selectRole('EMPLOYEE')">
+                                    <input type="radio" name="role" id="roleEmployee" value="EMPLOYEE" checked>
+                                    <i class="fas fa-user-circle font-24 mb-2"></i>
+                                    <h6 class="mb-0 fw-bold font-13">Employee</h6>
+                                    <span class="font-10 text-muted">Contribute to tasks</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="role-card text-center py-3" onclick="selectRole('PROJECT_MANAGER')">
+                                    <input type="radio" name="role" id="roleManager" value="PROJECT_MANAGER">
+                                    <i class="fas fa-user-tie font-24 mb-2"></i>
+                                    <h6 class="mb-0 fw-bold font-13">Project Manager</h6>
+                                    <span class="font-10 text-muted">Manage projects</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-13 fw-semibold">Password</label>
+                        <input type="password" name="password1" id="regPassword" class="form-control" placeholder="••••••••" required>
+                        <div class="progress mt-2" style="height: 4px;">
+                            <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small id="passwordFeedback" class="text-muted font-11 mt-1 d-block">Min. 8 characters with letters and numbers.</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label font-13 fw-semibold">Confirm Password</label>
+                        <input type="password" name="password2" class="form-control" placeholder="••••••••" required>
+                        <div class="invalid-feedback">Please confirm your password.</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        Get Started <i class="fas fa-rocket ms-2 font-12"></i>
+                    </button>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <span class="text-muted font-13">Already have an account? </span>
+                    <a href="{% url 'login' %}" class="font-13 fw-bold">Sign In here</a>
                 </div>
-            {% endif %}
-            
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">First Name</label>
-                    <input type="text" name="first_name" class="form-control" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Last Name</label>
-                    <input type="text" name="last_name" class="form-control" required>
-                </div>
             </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" required>
-                <small class="text-muted">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</small>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-control" required>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Role</label>
-                <select name="role" class="form-control" required>
-                    <option value="EMPLOYEE">Employee</option>
-                    <option value="PROJECT_MANAGER">Project Manager</option>
-                </select>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" name="password1" class="form-control" required>
-                <small class="text-muted">
-                    Your password must contain at least 8 characters and can't be entirely numeric.
-                </small>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Confirm Password</label>
-                <input type="password" name="password2" class="form-control" required>
-            </div>
-            
-            <button type="submit" class="btn btn-primary w-100">Register</button>
-            
-            <div class="text-center mt-3">
-                <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function selectRole(role) {
+            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('selected'));
+            if (role === 'EMPLOYEE') {
+                document.getElementById('roleEmployee').checked = true;
+                document.getElementById('roleEmployee').closest('.role-card').classList.add('selected');
+            } else {
+                document.getElementById('roleManager').checked = true;
+                document.getElementById('roleManager').closest('.role-card').classList.add('selected');
+            }
+        }
 
-<style>
-.auth-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px;
-}
-.auth-card {
-    background: white;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 500px;
-}
-</style>
-{% endblock %}
+        // Real-time password strength check
+        const pwd = document.getElementById('regPassword');
+        const strengthBar = document.getElementById('passwordStrength');
+        const feedback = document.getElementById('passwordFeedback');
+
+        pwd.addEventListener('input', () => {
+            let val = pwd.value;
+            let score = 0;
+            if (val.length >= 8) score += 30;
+            if (/[A-Z]/.test(val)) score += 20;
+            if (/[a-z]/.test(val)) score += 20;
+            if (/[0-9]/.test(val)) score += 15;
+            if (/[^A-Za-z0-9]/.test(val)) score += 15;
+
+            strengthBar.style.width = score + '%';
+            if (score < 40) {
+                strengthBar.className = 'progress-bar bg-danger';
+                feedback.textContent = 'Weak password';
+            } else if (score < 75) {
+                strengthBar.className = 'progress-bar bg-warning';
+                feedback.textContent = 'Moderate password';
+            } else {
+                strengthBar.className = 'progress-bar bg-success';
+                feedback.textContent = 'Strong password';
+            }
+        });
+
+        // Bootstrap form validation
+        (() => {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+</body>
+</html>

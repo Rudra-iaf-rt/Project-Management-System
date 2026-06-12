@@ -162,6 +162,8 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Task
 
+from apps.projects.models import Project
+
 @login_required
 def kanban_board(request):
     """Kanban board view for task management"""
@@ -170,10 +172,13 @@ def kanban_board(request):
     # Get tasks based on user role
     if user.role == 'SUPER_ADMIN':
         tasks = Task.objects.all()
+        user_projects = Project.objects.all()
     elif user.role == 'PROJECT_MANAGER':
         tasks = Task.objects.filter(project__project_manager=user)
+        user_projects = Project.objects.filter(project_manager=user)
     else:  # EMPLOYEE
         tasks = Task.objects.filter(assigned_to=user)
+        user_projects = Project.objects.filter(team_members=user)
     
     # Organize tasks by status
     context = {
@@ -181,6 +186,7 @@ def kanban_board(request):
         'in_progress_tasks': tasks.filter(status='IN_PROGRESS'),
         'testing_tasks': tasks.filter(status='TESTING'),
         'completed_tasks': tasks.filter(status='COMPLETED'),
+        'user_projects': user_projects,
     }
     
     return render(request, 'tasks/kanban_board.html', context)

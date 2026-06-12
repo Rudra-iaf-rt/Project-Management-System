@@ -1,66 +1,89 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Assign Team Members - {{ project.name }}{% endblock %}
+{% block title %}Manage Members - {{ project.name }} | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Assign Team Members to: {{ project.name }}</h4>
-                </div>
-                <div class="card-body">
+<div class="container-fluid py-4">
+    <div class="mb-3">
+        <a href="{% url 'project_detail' project.id %}#team" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+            <i class="fas fa-arrow-left"></i> Back to Workspace
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="mb-4">
+                        <span class="badge bg-badge-primary mb-2">{{ project.project_code }}</span>
+                        <h2 class="fw-bold text-dark-mode-light mb-1" style="font-family: 'Outfit', sans-serif;">Manage Workspace Team</h2>
+                        <p class="text-muted font-14">Add or remove members for workspace: <strong>{{ project.name }}</strong></p>
+                    </div>
+
                     <form method="post">
                         {% csrf_token %}
-                        
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+                        <!-- Current Team Members Chips -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-secondary font-13 d-block mb-3">Current Team Contributors</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <!-- Manager -->
+                                <div class="badge bg-badge-primary d-flex align-items-center gap-2 p-2 px-3 border border-primary border-opacity-10" style="border-radius: 8px;">
+                                    <i class="fas fa-user-shield text-primary"></i>
+                                    <div class="text-start">
+                                        <div class="fw-bold text-primary font-12" style="line-height: 1.2;">{{ project.project_manager.get_full_name|default:project.project_manager.username }}</div>
+                                        <div class="text-muted font-9" style="line-height: 1.2;">Project Manager (Owner)</div>
+                                    </div>
                                 </div>
-                            {% endfor %}
-                        {% endif %}
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Current Team Members</label>
-                            <div class="current-members">
+
+                                <!-- Members -->
                                 {% for member in project.team_members.all %}
-                                    <span class="badge bg-primary me-2 mb-2 p-2">
-                                        {{ member.get_full_name|default:member.username }}
-                                        <a href="{% url 'project_remove_member' project.id member.id %}" class="text-white ms-2" onclick="return confirm('Remove this member?')">
-                                            <i class="fas fa-times"></i>
+                                    <div class="badge bg-light text-secondary d-flex align-items-center gap-3 p-2 px-3 border border-color" style="border-radius: 8px;">
+                                        <div class="text-start">
+                                            <div class="fw-bold text-dark-mode-light font-12" style="line-height: 1.2;">{{ member.get_full_name|default:member.username }}</div>
+                                            <div class="text-muted font-9" style="line-height: 1.2;">{{ member.designation|default:"Contributor" }}</div>
+                                        </div>
+                                        <a href="{% url 'project_remove_member' project.id member.id %}" class="text-danger font-11 hover-scale" onclick="return confirm('Remove {{ member.get_full_name|default:member.username }} from workspace team?')" style="transition: transform 0.2s;">
+                                            <i class="fas fa-times-circle"></i>
                                         </a>
-                                    </span>
+                                    </div>
                                 {% empty %}
-                                    <p class="text-muted">No members assigned yet</p>
+                                    <p class="text-muted font-13 mb-0 py-2">No workspace contributors assigned yet.</p>
                                 {% endfor %}
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Add New Members</label>
-                            <select name="members" class="form-control" multiple size="10">
+
+                        <hr class="border-color my-4">
+
+                        <!-- Available Employees Selection -->
+                        <div class="mb-4">
+                            <label for="id_members" class="form-label fw-semibold text-secondary font-13">Select and Add Members</label>
+                            <select name="members" id="id_members" class="form-select" multiple size="8">
                                 {% for user in available_users %}
-                                    <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }} ({{ user.designation|default:"Employee" }})</option>
+                                    <option value="{{ user.id }}" class="py-2 px-3">
+                                        {{ user.get_full_name|default:user.username }} &nbsp;—&nbsp; ({{ user.designation|default:"Employee" }})
+                                    </option>
+                                {% empty %}
+                                    <option disabled>All available employees are already members of this workspace.</option>
                                 {% endfor %}
                             </select>
-                            <small class="text-muted">Hold Ctrl to select multiple members</small>
+                            <div class="form-text font-12 text-muted mt-2">
+                                <i class="fas fa-keyboard me-1"></i> Hold <kbd class="bg-secondary text-white font-10">Ctrl</kbd> (or <kbd class="bg-secondary text-white font-10">⌘ Cmd</kbd>) to select multiple employees to assign.
+                            </div>
                         </div>
-                        
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Note:</strong> Added members will be able to view and contribute to this project.
+
+                        <div class="bg-warning-light border border-color rounded p-3 mb-4 d-flex gap-3 align-items-center">
+                            <i class="fas fa-exclamation-triangle text-warning font-18"></i>
+                            <span class="font-13 text-secondary">Added members gain viewing and modification permissions for all tasks, and file vault access inside this project.</span>
                         </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary me-md-2">
-                                <i class="fas fa-arrow-left"></i> Back to Project
+
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="{% url 'project_detail' project.id %}#team" class="btn btn-outline-secondary px-4">
+                                Back to Workspace
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-user-plus"></i> Add Selected Members
+                            <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2" {% if not available_users %}disabled{% endif %}>
+                                <i class="fas fa-user-plus font-12"></i> Add Selected Members
                             </button>
                         </div>
                     </form>

@@ -1,99 +1,218 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ task.title }} - Task Details{% endblock %}
+{% block title %}{{ task.title }} - Details | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4>{{ task.title }}</h4>
-                        <div>
-                            {% if can_edit %}
-                                <a href="{% url 'task_update' task.id %}" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a href="{% url 'task_delete' task.id %}" class="btn btn-danger btn-sm">
-                                    <i class="fas fa-trash"></i> Delete
-                                </a>
-                            {% endif %}
-                        </div>
+<div class="container-fluid py-4">
+    <!-- Breadcrumb & Back navigation -->
+    <div class="mb-3">
+        {% if task.project %}
+            <a href="{% url 'project_detail' task.project.id %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Back to {{ task.project.name }}
+            </a>
+        {% else %}
+            <a href="{% url 'task_list' %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Back to Tasks
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Main Detail Layout -->
+    <div class="row g-4">
+        <!-- Left Column: Content & Description -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 p-md-5">
+                    <!-- Title & Code -->
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                        <span class="badge bg-badge-primary font-12 fw-bold">{{ task.task_code|default:"GLOBAL" }}</span>
+                        <span class="badge bg-badge-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %} text-uppercase">
+                            {{ task.get_priority_display }} Priority
+                        </span>
+                        <span class="badge bg-badge-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}primary{% elif task.status == 'TESTING' %}info{% else %}secondary{% endif %} text-uppercase">
+                            {{ task.get_status_display }}
+                        </span>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <p><strong>Project:</strong> {{ task.project.name }}</p>
-                            <p><strong>Assigned To:</strong> {{ task.assigned_to.get_full_name }}</p>
-                            <p><strong>Assigned By:</strong> {{ task.assigned_by.get_full_name }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Priority:</strong> 
-                                <span class="badge bg-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
-                                    {{ task.get_priority_display }}
-                                </span>
-                            </p>
-                            <p><strong>Status:</strong>
-                                <span class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %}">
-                                    {{ task.get_status_display }}
-                                </span>
-                            </p>
-                            <p><strong>Deadline:</strong> 
-                                <span class="{% if task.is_overdue %}text-danger{% endif %}">
-                                    {{ task.deadline|date:"F d, Y H:i" }}
-                                    {% if task.is_overdue %}(Overdue){% endif %}
-                                </span>
-                            </p>
-                        </div>
+                    <h2 class="fw-bold text-dark-mode-light mb-4" style="font-family: 'Outfit', sans-serif;">{{ task.title }}</h2>
+                    
+                    <!-- Description Block -->
+                    <h5 class="fw-bold text-dark-mode-light mb-3" style="font-family: 'Outfit', sans-serif;">Description</h5>
+                    <div class="text-secondary font-14 mb-5" style="line-height: 1.6; white-space: pre-line;">
+                        {{ task.description|default:"No description provided for this task." }}
                     </div>
-                    
-                    <hr>
-                    
-                    <h6>Description</h6>
-                    <p>{{ task.description|linebreaks }}</p>
-                    
-                    <hr>
-                    
-                    <div class="row">
+
+                    <hr class="border-color my-4">
+
+                    <!-- Metas Row -->
+                    <div class="row g-4">
                         <div class="col-md-6">
-                            <h6>Time Tracking</h6>
-                            <p>Estimated Hours: {{ task.estimated_hours }} hours</p>
-                            <p>Actual Hours: {{ task.actual_hours }} hours</p>
+                            <h5 class="fw-bold text-dark-mode-light mb-3" style="font-family: 'Outfit', sans-serif;">Time Tracking</h5>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted font-13">Estimated Effort</span>
+                                    <span class="fw-semibold text-dark-mode-light font-13">{{ task.estimated_hours|default:"0" }} Hours</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted font-13">Actual Logged</span>
+                                    <span class="fw-semibold text-dark-mode-light font-13">{{ task.actual_hours|default:"0" }} Hours</span>
+                                </div>
+                                {% if task.estimated_hours %}
+                                    <div class="progress mt-2" style="height: 6px;">
+                                        <div class="progress-bar" role="progressbar" style="width: {% widthratio task.actual_hours|default:0 task.estimated_hours 100 %}%"></div>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
+
                         <div class="col-md-6">
-                            <h6>Timeline</h6>
-                            <p>Created: {{ task.created_at|date:"F d, Y H:i" }}</p>
-                            <p>Last Updated: {{ task.updated_at|date:"F d, Y H:i" }}</p>
-                            {% if task.completed_at %}
-                                <p>Completed: {{ task.completed_at|date:"F d, Y H:i" }}</p>
-                            {% endif %}
+                            <h5 class="fw-bold text-dark-mode-light mb-3" style="font-family: 'Outfit', sans-serif;">Workspace Metadata</h5>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted font-13">Created Date</span>
+                                    <span class="fw-semibold text-dark-mode-light font-13">{{ task.created_at|date:"M d, Y H:i" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted font-13">Last Updated</span>
+                                    <span class="fw-semibold text-dark-mode-light font-13">{{ task.updated_at|date:"M d, Y H:i" }}</span>
+                                </div>
+                                {% if task.completed_at %}
+                                    <div class="d-flex justify-content-between text-success">
+                                        <span class="font-13">Completed Date</span>
+                                        <span class="fw-bold font-13">{{ task.completed_at|date:"M d, Y H:i" }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Update Status</h5>
+
+        <!-- Right Column: Control & Status Updates -->
+        <div class="col-lg-4">
+            <!-- Action Panel -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark-mode-light mb-3" style="font-family: 'Outfit', sans-serif;">Assignees & Details</h5>
+                    
+                    <div class="d-flex flex-column gap-3 mb-4">
+                        <div class="border-bottom border-color pb-2">
+                            <span class="text-muted font-11 text-uppercase fw-semibold d-block mb-1">Project Workspace</span>
+                            {% if task.project %}
+                                <a href="{% url 'project_detail' task.project.id %}" class="fw-bold font-13 text-primary d-inline-flex align-items-center gap-1">
+                                    <i class="far fa-folder"></i> {{ task.project.name }}
+                                </a>
+                            {% else %}
+                                <span class="fw-bold font-13 text-secondary">Global Workspace</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="border-bottom border-color pb-2">
+                            <span class="text-muted font-11 text-uppercase fw-semibold d-block mb-2">Assigned Contributor</span>
+                            <div class="d-flex align-items-center gap-2">
+                                {% if task.assigned_to.profile_picture %}
+                                    <img src="{{ task.assigned_to.profile_picture.url }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center font-12 fw-bold" style="width: 32px; height: 32px;">
+                                        {{ task.assigned_to.first_name|first|upper }}{{ task.assigned_to.last_name|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <span class="font-13 fw-semibold text-dark-mode-light">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                            </div>
+                        </div>
+
+                        <div class="border-bottom border-color pb-2">
+                            <span class="text-muted font-11 text-uppercase fw-semibold d-block mb-1">Assigned By</span>
+                            <span class="font-13 text-secondary">{{ task.assigned_by.get_full_name|default:task.assigned_by.username }}</span>
+                        </div>
+
+                        <div>
+                            <span class="text-muted font-11 text-uppercase fw-semibold d-block mb-1">Deadline</span>
+                            <span class="font-13 fw-bold {% if task.is_overdue %}text-danger{% else %}text-dark-mode-light{% endif %}">
+                                <i class="far fa-clock me-1"></i> {{ task.deadline|date:"M d, Y H:i" }}
+                                {% if task.is_overdue %}
+                                    <span class="badge bg-badge-danger font-9 ms-1">OVERDUE</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if can_edit %}
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a href="{% url 'task_update' task.id %}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 font-13">
+                                    <i class="fas fa-edit font-11"></i> Edit Task
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{% url 'task_delete' task.id %}" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 font-13">
+                                    <i class="fas fa-trash font-11"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="card-body">
-                    <form method="post" action="{% url 'update_task_status' task.id %}">
+            </div>
+
+            <!-- Fast Status Update -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark-mode-light mb-3" style="font-family: 'Outfit', sans-serif;">Change Task Status</h5>
+                    
+                    <form id="ajaxStatusForm">
                         {% csrf_token %}
-                        <select name="status" class="form-control mb-3">
-                            <option value="PENDING" {% if task.status == 'PENDING' %}selected{% endif %}>Pending</option>
-                            <option value="IN_PROGRESS" {% if task.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
-                            <option value="TESTING" {% if task.status == 'TESTING' %}selected{% endif %}>Testing</option>
-                            <option value="COMPLETED" {% if task.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                        <div class="mb-3">
+                            <select name="status" id="taskStatusSelect" class="form-select font-13">
+                                <option value="PENDING" {% if task.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                                <option value="IN_PROGRESS" {% if task.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                <option value="TESTING" {% if task.status == 'TESTING' %}selected{% endif %}>Testing</option>
+                                <option value="COMPLETED" {% if task.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 font-13 d-flex align-items-center justify-content-center gap-2">
+                            <i class="fas fa-save"></i> Save Status
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const statusForm = document.getElementById("ajaxStatusForm");
+    
+    if (statusForm) {
+        statusForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            const selectedStatus = document.getElementById("taskStatusSelect").value;
+            const formData = new FormData();
+            formData.append("status", selectedStatus);
+            
+            fetch("{% url 'update_task_status' task.id %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                },
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Show a toast or reload page
+                    location.reload();
+                } else {
+                    alert("Failed to update status. Make sure you have correct permissions.");
+                }
+            })
+            .catch(error => {
+                console.error("Error updating status:", error);
+                alert("An error occurred during status update.");
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -1,69 +1,128 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ team.name }} - Team Details{% endblock %}
+{% block title %}{{ team.name }} Details | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4>{{ team.name }}</h4>
-                        {% if can_edit %}
-                            <div>
-                                <a href="{% url 'add_member' team.id %}" class="btn btn-success btn-sm">
-                                    <i class="fas fa-user-plus"></i> Add Member
-                                </a>
-                                <a href="{% url 'team_update' team.id %}" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                            </div>
-                        {% endif %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb & Back navigation -->
+    <div class="mb-3">
+        <a href="{% url 'team_list' %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+            <i class="fas fa-arrow-left"></i> Back to Teams
+        </a>
+    </div>
+
+    <!-- Team Header Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
+                        <span class="badge bg-badge-primary text-uppercase font-10">Lead: {{ team.team_lead.get_full_name|default:team.team_lead.username }}</span>
+                        <span class="badge bg-light text-secondary border font-10">{{ members.count }} Members</span>
                     </div>
+                    <h2 class="fw-bold text-dark-mode-light mb-2" style="font-family: 'Outfit', sans-serif;">{{ team.name }}</h2>
+                    <p class="text-muted mb-0 font-14">{{ team.description|default:"No description provided for this team." }}</p>
                 </div>
-                <div class="card-body">
-                    <p>{{ team.description }}</p>
-                    <hr>
-                    <h5>Team Members</h5>
-                    <div class="row">
-                        {% for member in members %}
-                            <div class="col-md-4 mb-3">
-                                <div class="member-card">
-                                    <div class="d-flex align-items-center">
-                                        <div class="member-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                            {{ member.first_name|first|upper }}{{ member.last_name|first|upper }}
+                <div class="col-md-4 text-md-end d-flex flex-wrap gap-2 justify-content-md-end">
+                    {% if can_edit %}
+                        <a href="{% url 'add_member' team.id %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <i class="fas fa-user-plus font-12"></i> Add Contributor
+                        </a>
+                        <a href="{% url 'team_update' team.id %}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                            <i class="fas fa-edit font-12"></i> Edit Team
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Split Row -->
+    <div class="row g-4">
+        <!-- Members List -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 bg-transparent py-3">
+                    <h5 class="fw-bold text-dark-mode-light mb-0" style="font-family: 'Outfit', sans-serif;">Team Members</h5>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="row g-3">
+                        <!-- Lead profile item first -->
+                        <div class="col-md-6 col-sm-12">
+                            <div class="border border-primary border-opacity-20 rounded p-3 bg-primary-light d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if team.team_lead.profile_picture %}
+                                        <img src="{{ team.team_lead.profile_picture.url }}" class="rounded-circle" style="width: 46px; height: 46px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 46px; height: 46px; font-size: 13px;">
+                                            {{ team.team_lead.first_name|first|upper }}{{ team.team_lead.last_name|first|upper }}
                                         </div>
-                                        <div>
-                                            <h6 class="mb-0">{{ member.get_full_name }}</h6>
-                                            <small class="text-muted">{{ member.designation|default:"Team Member" }}</small>
-                                            {% for role in team_roles %}
-                                                {% if role.user == member %}
-                                                    <br><small class="badge bg-info">{{ role.role }}</small>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="fw-bold text-dark-mode-light mb-1">{{ team.team_lead.get_full_name|default:team.team_lead.username }}</h6>
+                                        <small class="text-muted font-11">Team Lead &bull; {{ team.team_lead.email }}</small>
                                     </div>
                                 </div>
+                                <span class="badge bg-primary text-white font-9">Lead</span>
                             </div>
+                        </div>
+
+                        <!-- Contributors -->
+                        {% for member in members %}
+                            {% if member != team.team_lead %}
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="border border-color rounded p-3 d-flex align-items-center justify-content-between hover-border" style="transition: border-color 0.2s;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            {% if member.profile_picture %}
+                                                <img src="{{ member.profile_picture.url }}" class="rounded-circle" style="width: 46px; height: 46px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 46px; height: 46px; font-size: 13px;">
+                                                    {{ member.first_name|first|upper }}{{ member.last_name|first|upper }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="fw-bold text-dark-mode-light mb-1">{{ member.get_full_name|default:member.username }}</h6>
+                                                <small class="text-muted font-11">
+                                                    {{ member.designation|default:"Team Contributor" }} &bull; {{ member.email }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Check custom role in template -->
+                                        {% for role in team_roles %}
+                                            {% if role.user == member %}
+                                                <span class="badge bg-light text-secondary border font-9">{{ role.role }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Team Chat</h5>
+
+        <!-- Chat Link & Metas -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm text-center p-4">
+                <div class="rounded-circle bg-primary-light d-flex align-items-center justify-content-center text-primary mx-auto mb-3" style="width: 70px; height: 70px;">
+                    <i class="fas fa-comments font-30"></i>
                 </div>
-                <div class="card-body">
-                    <a href="{% url 'chat_room' team.id %}" class="btn btn-primary w-100">
-                        <i class="fas fa-comments"></i> Join Team Chat
-                    </a>
-                </div>
+                <h5 class="fw-bold text-dark-mode-light mb-2" style="font-family: 'Outfit', sans-serif;">Team Chatroom</h5>
+                <p class="text-muted font-13 mb-4">Direct message channel for team {{ team.name }} members.</p>
+                <a href="{% url 'chat_room' team.id %}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                    <span>Join Discussion</span> <i class="fas fa-arrow-right font-10"></i>
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.hover-border:hover {
+    border-color: var(--border-hover) !important;
+}
+</style>
 {% endblock %}

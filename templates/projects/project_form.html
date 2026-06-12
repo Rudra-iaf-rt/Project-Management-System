@@ -1,94 +1,149 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ title }} - Project Management System{% endblock %}
+{% block title %}{{ title }} | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid py-4">
+    <!-- Breadcrumbs -->
+    <div class="mb-3">
+        {% if project %}
+            <a href="{% url 'project_detail' project.id %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Back to Project
+            </a>
+        {% else %}
+            <a href="{% url 'project_list' %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Back to Projects
+            </a>
+        {% endif %}
+    </div>
+
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">{{ title }}</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="mb-4">
+                        <h2 class="fw-bold text-dark-mode-light mb-1" style="font-family: 'Outfit', sans-serif;">{{ title }}</h2>
+                        <p class="text-muted font-14">Define your workspace properties and assign contributors.</p>
+                    </div>
+
+                    <form method="post" novalidate>
                         {% csrf_token %}
                         
-                        {% if form.errors %}
-                            <div class="alert alert-danger">
-                                <strong>Please correct the following errors:</strong>
-                                <ul>
-                                    {% for field, errors in form.errors.items %}
-                                        {% for error in errors %}
-                                            <li>{{ field|title }}: {{ error }}</li>
-                                        {% endfor %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger shadow-sm mb-4">
+                                <h6 class="fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Please resolve the following:</h6>
+                                <ul class="mb-0 font-13">
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
                                     {% endfor %}
                                 </ul>
                             </div>
                         {% endif %}
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Project Name *</label>
-                            {{ form.name }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Project Code *</label>
-                            {{ form.project_code }}
-                            <small class="text-muted">Unique identifier for the project (e.g., PRJ-001)</small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            {{ form.description }}
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Start Date *</label>
+
+                        <div class="row g-4">
+                            <!-- Name -->
+                            <div class="col-md-12">
+                                <label for="id_name" class="form-label fw-semibold text-secondary font-13">Project Name <span class="text-danger">*</span></label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.name.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Code -->
+                            <div class="col-md-12">
+                                <label for="id_project_code" class="form-label fw-semibold text-secondary font-13">Project Code <span class="text-danger">*</span></label>
+                                {{ form.project_code }}
+                                <div class="form-text font-12 text-muted">A unique shorthand identifier for tasks (e.g. AURA, PMS). Will auto-generate from the name if left blank.</div>
+                                {% if form.project_code.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.project_code.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-md-12">
+                                <label for="id_description" class="form-label fw-semibold text-secondary font-13">Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.description.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Start Date -->
+                            <div class="col-md-6">
+                                <label for="id_start_date" class="form-label fw-semibold text-secondary font-13">Start Date <span class="text-danger">*</span></label>
                                 {{ form.start_date }}
+                                {% if form.start_date.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.start_date.errors|first }}</div>
+                                {% endif %}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">End Date *</label>
+
+                            <!-- End Date -->
+                            <div class="col-md-6">
+                                <label for="id_end_date" class="form-label fw-semibold text-secondary font-13">End Date <span class="text-danger">*</span></label>
                                 {{ form.end_date }}
+                                {% if form.end_date.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.end_date.errors|first }}</div>
+                                {% endif %}
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Priority</label>
+
+                            <!-- Priority -->
+                            <div class="col-md-6">
+                                <label for="id_priority" class="form-label fw-semibold text-secondary font-13">Priority</label>
                                 {{ form.priority }}
+                                {% if form.priority.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.priority.errors|first }}</div>
+                                {% endif %}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Status</label>
+
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label for="id_status" class="form-label fw-semibold text-secondary font-13">Status</label>
                                 {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.status.errors|first }}</div>
+                                {% endif %}
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Budget ($)</label>
-                                {{ form.budget }}
+
+                            <!-- Budget -->
+                            <div class="col-md-6">
+                                <label for="id_budget" class="form-label fw-semibold text-secondary font-13">Budget (USD)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0 font-13">$</span>
+                                    {{ form.budget }}
+                                </div>
+                                {% if form.budget.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.budget.errors|first }}</div>
+                                {% endif %}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Team Members</label>
+
+                            <!-- Team Members -->
+                            <div class="col-md-6">
+                                <label for="id_team_members" class="form-label fw-semibold text-secondary font-13">Team Members</label>
                                 {{ form.team_members }}
-                                <small class="text-muted">Hold Ctrl to select multiple members</small>
+                                <div class="form-text font-12 text-muted">Hold <kbd class="bg-secondary text-white font-10">Ctrl</kbd> (or <kbd class="bg-secondary text-white font-10">⌘ Cmd</kbd> on Mac) to select multiple.</div>
+                                {% if form.team_members.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.team_members.errors|first }}</div>
+                                {% endif %}
                             </div>
                         </div>
-                        
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Note:</strong> The project manager will be set to you automatically.
+
+                        <!-- Banner Info -->
+                        <div class="bg-primary-light border border-color rounded p-3 mt-4 mb-4 d-flex gap-3 align-items-center">
+                            <i class="fas fa-info-circle text-primary font-18"></i>
+                            <span class="font-13 text-secondary">Creating this workspace designates you as the <strong>Project Manager</strong>. You will automatically receive administrator privileges for this project.</span>
                         </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'project_list' %}" class="btn btn-secondary me-md-2">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ title }}
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-3">
+                            {% if project %}
+                                <a href="{% url 'project_detail' project.id %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                            {% else %}
+                                <a href="{% url 'project_list' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2">
+                                <i class="fas fa-save font-12"></i> Save Changes
                             </button>
                         </div>
                     </form>
@@ -99,20 +154,63 @@
 </div>
 
 <script>
-// Auto-generate project code
+// Auto-generate project code from project name
 document.addEventListener('DOMContentLoaded', function() {
     const nameInput = document.querySelector('#id_name');
     const codeInput = document.querySelector('#id_project_code');
     
-    if (nameInput && codeInput && !codeInput.value) {
-        nameInput.addEventListener('blur', function() {
-            if (!codeInput.value) {
-                const projectName = nameInput.value;
-                const prefix = projectName.substring(0, 3).toUpperCase();
-                const randomNum = Math.floor(Math.random() * 1000);
-                codeInput.value = `${prefix}-${randomNum}`;
-            }
-        });
+    if (nameInput && codeInput) {
+        // Ensure classes are correct for styling
+        nameInput.classList.add('form-control');
+        codeInput.classList.add('form-control');
+        
+        const descInput = document.querySelector('#id_description');
+        if (descInput) descInput.classList.add('form-control');
+        
+        const startInput = document.querySelector('#id_start_date');
+        if (startInput) {
+            startInput.classList.add('form-control');
+            startInput.type = 'date';
+        }
+        
+        const endInput = document.querySelector('#id_end_date');
+        if (endInput) {
+            endInput.classList.add('form-control');
+            endInput.type = 'date';
+        }
+        
+        const priorityInput = document.querySelector('#id_priority');
+        if (priorityInput) priorityInput.classList.add('form-select');
+        
+        const statusInput = document.querySelector('#id_status');
+        if (statusInput) statusInput.classList.add('form-select');
+        
+        const budgetInput = document.querySelector('#id_budget');
+        if (budgetInput) budgetInput.classList.add('form-control');
+        
+        const teamInput = document.querySelector('#id_team_members');
+        if (teamInput) teamInput.classList.add('form-select');
+
+        if (!codeInput.value) {
+            nameInput.addEventListener('blur', function() {
+                if (!codeInput.value) {
+                    const projectName = nameInput.value.trim();
+                    if (projectName) {
+                        // Extract consonants or first characters
+                        const cleanName = projectName.replace(/[^a-zA-Z0-9\s]/g, '');
+                        const words = cleanName.split(/\s+/);
+                        let prefix = '';
+                        if (words.length >= 2) {
+                            prefix = (words[0][0] + words[1][0]).toUpperCase();
+                        } else {
+                            prefix = cleanName.substring(0, 3).toUpperCase();
+                        }
+                        const randomNum = Math.floor(100 + Math.random() * 900);
+                        codeInput.value = `${prefix}-${randomNum}`;
+                    }
+                }
+            });
+        }
     }
 });
 </script>

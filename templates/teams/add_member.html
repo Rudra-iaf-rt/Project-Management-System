@@ -1,32 +1,68 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Add Member to {{ team.name }}{% endblock %}
+{% block title %}Add Member to {{ team.name }} | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid py-4">
+    <!-- Breadcrumbs -->
+    <div class="mb-3">
+        <a href="{% url 'team_detail' team.id %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+            <i class="fas fa-arrow-left"></i> Back to Team Details
+        </a>
+    </div>
+
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Add Member to: {{ team.name }}</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post">
+        <div class="col-lg-6 col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div class="rounded-circle bg-primary-light d-flex align-items-center justify-content-center text-primary mx-auto mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-user-plus font-30"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark-mode-light mb-1" style="font-family: 'Outfit', sans-serif;">Add Team Member</h3>
+                        <p class="text-muted font-13">Assign an employee to team: <strong>{{ team.name }}</strong></p>
+                    </div>
+
+                    <form method="post" novalidate>
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label class="form-label">Select User</label>
-                            {{ form.user }}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger shadow-sm mb-4">
+                                <h6 class="fw-bold mb-1"><i class="fas fa-exclamation-triangle me-2"></i>Please resolve:</h6>
+                                <ul class="mb-0 font-13 ps-3">
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <div class="row g-4">
+                            <!-- Select User -->
+                            <div class="col-12">
+                                <label for="id_user" class="form-label fw-semibold text-secondary font-13">Select Contributor <span class="text-danger">*</span></label>
+                                {{ form.user }}
+                                {% if form.user.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.user.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Role Title -->
+                            <div class="col-12">
+                                <label for="id_role" class="form-label fw-semibold text-secondary font-13">Role Title <span class="text-danger">*</span></label>
+                                {{ form.role }}
+                                <div class="form-text font-12 text-muted mt-1">Specify this user's functional role in this team workspace (e.g. Developer, Tester, Designer).</div>
+                                {% if form.role.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.role.errors|first }}</div>
+                                {% endif %}
+                            </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Role</label>
-                            {{ form.role }}
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Add Member</button>
-                            <a href="{% url 'team_detail' team.id %}" class="btn btn-secondary">Cancel</a>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-column gap-2 mt-4 pt-2">
+                            <button type="submit" class="btn btn-primary w-100">Add Contributor</button>
+                            <a href="{% url 'team_detail' team.id %}" class="btn btn-outline-secondary w-100">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -34,4 +70,14 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const userSelect = document.querySelector("#id_user");
+    if (userSelect) userSelect.classList.add("form-select");
+    
+    const roleInput = document.querySelector("#id_role");
+    if (roleInput) roleInput.classList.add("form-control");
+});
+</script>
 {% endblock %}

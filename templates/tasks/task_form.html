@@ -1,74 +1,145 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ title }} - Task Management{% endblock %}
+{% block title %}{{ title }} | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid py-4">
+    <!-- Breadcrumbs -->
+    <div class="mb-3">
+        {% if task %}
+            <a href="{% url 'task_detail' task.id %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Back to Task Details
+            </a>
+        {% else %}
+            <a href="{% url 'task_list' %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Back to Tasks
+            </a>
+        {% endif %}
+    </div>
+
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4>{{ title }}</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="mb-4">
+                        <h2 class="fw-bold text-dark-mode-light mb-1" style="font-family: 'Outfit', sans-serif;">{{ title }}</h2>
+                        <p class="text-muted font-14">Define task parameters, assign it to a team member, and specify constraints.</p>
+                    </div>
+
+                    <form method="post" novalidate>
                         {% csrf_token %}
                         
-                        {% if form.errors %}
-                            <div class="alert alert-danger">
-                                Please correct the errors below.
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger shadow-sm mb-4">
+                                <h6 class="fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Please resolve the following:</h6>
+                                <ul class="mb-0 font-13">
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
                             </div>
                         {% endif %}
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Task Title *</label>
-                            {{ form.title }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            {{ form.description }}
-                        </div>
-                        
-                        {% if 'project' in form.fields %}
-                            <div class="mb-3">
-                                <label class="form-label">Project *</label>
-                                {{ form.project }}
+
+                        <div class="row g-4">
+                            <!-- Title -->
+                            <div class="col-md-12">
+                                <label for="id_title" class="form-label fw-semibold text-secondary font-13">Task Title <span class="text-danger">*</span></label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.title.errors|first }}</div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                        
-                        {% if 'assigned_to' in form.fields %}
-                            <div class="mb-3">
-                                <label class="form-label">Assign To *</label>
-                                {{ form.assigned_to }}
+
+                            <!-- Description -->
+                            <div class="col-md-12">
+                                <label for="id_description" class="form-label fw-semibold text-secondary font-13">Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.description.errors|first }}</div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Priority</label>
+
+                            <!-- Project Selection -->
+                            {% if 'project' in form.fields %}
+                                <div class="col-md-6">
+                                    <label for="id_project" class="form-label fw-semibold text-secondary font-13">Project Workspace <span class="text-danger">*</span></label>
+                                    {{ form.project }}
+                                    {% if form.project.errors %}
+                                        <div class="text-danger font-12 mt-1">{{ form.project.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            <!-- Assignee Selection -->
+                            {% if 'assigned_to' in form.fields %}
+                                <div class="col-md-6">
+                                    <label for="id_assigned_to" class="form-label fw-semibold text-secondary font-13">Assign Contributor <span class="text-danger">*</span></label>
+                                    {{ form.assigned_to }}
+                                    {% if form.assigned_to.errors %}
+                                        <div class="text-danger font-12 mt-1">{{ form.assigned_to.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            <!-- Priority -->
+                            <div class="col-md-6">
+                                <label for="id_priority" class="form-label fw-semibold text-secondary font-13">Priority</label>
                                 {{ form.priority }}
+                                {% if form.priority.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.priority.errors|first }}</div>
+                                {% endif %}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Status</label>
+
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label for="id_status" class="form-label fw-semibold text-secondary font-13">Status</label>
                                 {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.status.errors|first }}</div>
+                                {% endif %}
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Deadline *</label>
+
+                            <!-- Deadline -->
+                            <div class="col-md-6">
+                                <label for="id_deadline" class="form-label fw-semibold text-secondary font-13">Deadline <span class="text-danger">*</span></label>
                                 {{ form.deadline }}
+                                {% if form.deadline.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.deadline.errors|first }}</div>
+                                {% endif %}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Estimated Hours</label>
+
+                            <!-- Estimated Hours -->
+                            <div class="col-md-6">
+                                <label for="id_estimated_hours" class="form-label fw-semibold text-secondary font-13">Estimated Hours</label>
                                 {{ form.estimated_hours }}
+                                {% if form.estimated_hours.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.estimated_hours.errors|first }}</div>
+                                {% endif %}
                             </div>
+                            
+                            <!-- Actual Hours (If present, e.g. for update forms) -->
+                            {% if 'actual_hours' in form.fields %}
+                                <div class="col-md-6">
+                                    <label for="id_actual_hours" class="form-label fw-semibold text-secondary font-13">Actual Hours Logged</label>
+                                    {{ form.actual_hours }}
+                                    {% if form.actual_hours.errors %}
+                                        <div class="text-danger font-12 mt-1">{{ form.actual_hours.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
                         </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'task_list' %}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Save Task</button>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-3 mt-5">
+                            {% if task %}
+                                <a href="{% url 'task_detail' task.id %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                            {% else %}
+                                <a href="{% url 'task_list' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2">
+                                <i class="fas fa-save font-12"></i> Save Task
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -76,4 +147,29 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Dynamically inject classes
+    const inputs = ['title', 'description', 'project', 'assigned_to', 'priority', 'status', 'deadline', 'estimated_hours', 'actual_hours'];
+    
+    inputs.forEach(id => {
+        const el = document.querySelector(`#id_${id}`);
+        if (el) {
+            if (el.tagName === 'SELECT') {
+                el.classList.add('form-select');
+            } else {
+                el.classList.add('form-control');
+            }
+            
+            if (id === 'deadline') {
+                // Ensure datepicker UI for datetime inputs
+                if (!el.value) {
+                    el.type = 'datetime-local';
+                }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

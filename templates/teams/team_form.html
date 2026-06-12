@@ -1,38 +1,82 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }} | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid py-4">
+    <!-- Breadcrumbs -->
+    <div class="mb-3">
+        <a href="{% url 'team_list' %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+            <i class="fas fa-arrow-left"></i> Back to Teams
+        </a>
+    </div>
+
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h4>{{ title }}</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post">
+        <div class="col-lg-6 col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="mb-4">
+                        <h2 class="fw-bold text-dark-mode-light mb-1" style="font-family: 'Outfit', sans-serif;">{{ title }}</h2>
+                        <p class="text-muted font-13">Configure workspace team parameters and add initial members.</p>
+                    </div>
+
+                    <form method="post" novalidate>
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label class="form-label">Team Name</label>
-                            {{ form.name }}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger shadow-sm mb-4">
+                                <h6 class="fw-bold mb-1"><i class="fas fa-exclamation-triangle me-2"></i>Please resolve:</h6>
+                                <ul class="mb-0 font-13 ps-3">
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <div class="row g-4">
+                            <!-- Team Name -->
+                            <div class="col-12">
+                                <label for="id_name" class="form-label fw-semibold text-secondary font-13">Team Name <span class="text-danger">*</span></label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.name.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <label for="id_description" class="form-label fw-semibold text-secondary font-13">Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.description.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Team Members Selection -->
+                            <div class="col-12">
+                                <label for="id_members" class="form-label fw-semibold text-secondary font-13">Team Members Selection</label>
+                                {{ form.members }}
+                                <div class="form-text font-12 text-muted mt-2">
+                                    Hold <kbd class="bg-secondary text-white font-10">Ctrl</kbd> (or <kbd class="bg-secondary text-white font-10">⌘ Cmd</kbd>) to select multiple contributors.
+                                </div>
+                                {% if form.members.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.members.errors|first }}</div>
+                                {% endif %}
+                            </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            {{ form.description }}
+
+                        <!-- Info tag banner -->
+                        <div class="bg-primary-light border border-color rounded p-3 mt-4 mb-4 d-flex gap-3 align-items-center">
+                            <i class="fas fa-info-circle text-primary font-18"></i>
+                            <span class="font-12 text-secondary">Creating this team assigns you as the <strong>Team Lead</strong> automatically.</span>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Team Members</label>
-                            {{ form.members }}
-                            <small class="text-muted">Hold Ctrl to select multiple members</small>
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Save Team</button>
-                            <a href="{% url 'team_list' %}" class="btn btn-secondary">Cancel</a>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex flex-column gap-2">
+                            <button type="submit" class="btn btn-primary w-100">Save Team</button>
+                            <a href="{% url 'team_list' %}" class="btn btn-outline-secondary w-100">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -40,4 +84,23 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const nameInput = document.querySelector("#id_name");
+    if (nameInput) nameInput.classList.add("form-control");
+    
+    const descInput = document.querySelector("#id_description");
+    if (descInput) {
+        descInput.classList.add("form-control");
+        descInput.rows = 3;
+    }
+    
+    const memsSelect = document.querySelector("#id_members");
+    if (memsSelect) {
+        memsSelect.classList.add("form-select");
+        memsSelect.size = 8;
+    }
+});
+</script>
 {% endblock %}

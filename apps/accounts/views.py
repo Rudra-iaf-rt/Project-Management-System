@@ -14,7 +14,23 @@ from .forms import UserRegisterForm, UserProfileForm, UserUpdateForm
 from apps.projects.models import Project
 from apps.tasks.models import Task  # Changed this line
 from django.core.paginator import Paginator
-#from apps.accounts.views import login_view
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, 'Registration successful. Please log in.')
+            return redirect('login')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = UserRegisterForm()
+    
+    return render(request, 'accounts/register.html', {'form': form})
 
 def login_view(request):
     if request.user.is_authenticated:

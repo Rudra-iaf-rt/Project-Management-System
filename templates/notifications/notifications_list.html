@@ -1,87 +1,97 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Notifications - Project Management System{% endblock %}
+{% block title %}Notifications Inbox | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-bell"></i> Notifications</h2>
-        <button class="btn btn-outline-primary" onclick="notificationSystem.markAllAsRead()">
-            <i class="fas fa-check-double"></i> Mark All as Read
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Notifications Inbox</h2>
+            <p class="text-muted font-14 mb-0">Stay updated with latest task assignments, status progress, and team milestones.</p>
+        </div>
+        <button class="btn btn-outline-primary d-flex align-items-center gap-2" onclick="markAllReadLocal()">
+            <i class="fas fa-check-double font-12"></i> Mark All as Read
         </button>
     </div>
     
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover" id="allNotificationsList">
-                    <thead>
-                        <tr>
-                            <th width="50">Type</th>
-                            <th>Notification</th>
-                            <th width="150">Time</th>
-                            <th width="100">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for notification in notifications %}
-                        <tr class="{% if not notification.is_read %}table-active{% endif %}">
-                            <td>
-                                <i class="fas {{ notification.get_icon }} fa-lg"></i>
-                            </td>
-                            <td>
-                                <strong>{{ notification.title }}</strong><br>
-                                <small class="text-muted">{{ notification.message }}</small>
-                                {% if notification.link %}
-                                    <br><a href="{{ notification.link }}" class="small">View Details →</a>
-                                {% endif %}
-                            </td>
-                            <td>{{ notification.created_at|timesince }} ago</td>
-                            <td>
-                                {% if not notification.is_read %}
-                                    <button class="btn btn-sm btn-primary" onclick="markNotificationReadLocal({{ notification.id }})">
-                                        Mark Read
-                                    </button>
-                                {% else %}
-                                    <span class="badge bg-success">Read</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-5">
-                                <i class="fas fa-bell-slash fa-3x mb-3 d-block"></i>
-                                No notifications yet
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <!-- Feed Card Container -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="d-flex flex-column" id="notifications-feed">
+                {% for notification in notifications %}
+                    <div class="notification-feed-item p-4 border-bottom border-color d-flex align-items-start gap-3 position-relative {% if not notification.is_read %}unread-highlight{% endif %}" style="transition: background-color 0.2s;">
+                        <!-- Unread side stripe marker -->
+                        {% if not notification.is_read %}
+                            <div class="position-absolute h-100 bg-primary" style="width: 4px; left: 0; top: 0;"></div>
+                        {% endif %}
+
+                        <!-- Type Icon with styled background -->
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 bg-secondary-hover text-indigo-500" style="width: 46px; height: 46px;">
+                            <i class="fas {{ notification.get_icon }} font-16"></i>
+                        </div>
+
+                        <!-- Info details -->
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-1 mb-1">
+                                <h6 class="fw-bold text-dark-mode-light mb-0 font-14">{{ notification.title }}</h6>
+                                <span class="text-muted font-12"><i class="far fa-clock me-1"></i>{{ notification.created_at|timesince }} ago</span>
+                            </div>
+                            <p class="text-secondary font-13 mb-2">{{ notification.message }}</p>
+                            
+                            {% if notification.link %}
+                                <a href="{{ notification.link }}" class="font-12 fw-bold text-primary text-decoration-none d-inline-flex align-items-center gap-1 hover-arrow">
+                                    View Details <i class="fas fa-arrow-right font-9 transition-transform"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <!-- Read / Unread control -->
+                        <div class="flex-shrink-0 ps-2">
+                            {% if not notification.is_read %}
+                                <button class="btn btn-sm btn-outline-primary py-1 px-3 font-11 rounded" onclick="markNotificationReadLocal({{ notification.id }})">
+                                    Mark Read
+                                </button>
+                            {% else %}
+                                <span class="badge bg-badge-success text-success font-10">Read</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-5 text-muted p-4">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-muted mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-bell-slash font-30"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark-mode-light mb-1">Your Inbox is Empty</h5>
+                        <p class="font-13 mb-0">No notifications to display right now.</p>
+                    </div>
+                {% endfor %}
             </div>
             
             <!-- Pagination -->
             {% if notifications.has_other_pages %}
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center">
-                    {% if notifications.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ notifications.previous_page_number }}">Previous</a>
-                        </li>
-                    {% endif %}
-                    
-                    {% for i in notifications.paginator.page_range %}
-                        <li class="page-item {% if notifications.number == i %}active{% endif %}">
-                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-                        </li>
-                    {% endfor %}
-                    
-                    {% if notifications.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ notifications.next_page_number }}">Next</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
+                <nav class="my-4">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if notifications.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link shadow-none" href="?page={{ notifications.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for i in notifications.paginator.page_range %}
+                            <li class="page-item {% if notifications.number == i %}active{% endif %}">
+                                <a class="page-link shadow-none" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endfor %}
+                        
+                        {% if notifications.has_next %}
+                            <li class="page-item">
+                                <a class="page-link shadow-none" href="?page={{ notifications.next_page_number }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
             {% endif %}
         </div>
     </div>
@@ -90,6 +100,22 @@
 <script>
 function markNotificationReadLocal(id) {
     fetch(`/notifications/${id}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function markAllReadLocal() {
+    // Rely on global notificationSystem or inline fetch
+    fetch('/notifications/mark-all-read/', {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken')
@@ -118,5 +144,22 @@ function getCookie(name) {
     return cookieValue;
 }
 </script>
+
+<style>
+.unread-highlight {
+    background-color: rgba(79, 70, 229, 0.02);
+}
+.dark-mode .unread-highlight {
+    background-color: rgba(99, 102, 241, 0.04);
+}
+.bg-secondary-hover {
+    background-color: var(--bg-secondary);
+}
+.notification-feed-item:last-child {
+    border-bottom: none !important;
+}
+.hover-arrow:hover i {
+    transform: translateX(3px);
+}
+</style>
 {% endblock %}
-                            

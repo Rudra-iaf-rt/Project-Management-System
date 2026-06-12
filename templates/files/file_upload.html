@@ -1,42 +1,84 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Upload File{% endblock %}
+{% block title %}Upload File | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid py-4">
+    <!-- Breadcrumbs -->
+    <div class="mb-3">
+        <a href="{% url 'file_list' %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+            <i class="fas fa-arrow-left"></i> Back to File Vault
+        </a>
+    </div>
+
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Upload File</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
+        <div class="col-lg-6 col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div class="rounded-circle bg-primary-light d-flex align-items-center justify-content-center text-primary mx-auto mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-cloud-upload-alt font-30"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark-mode-light mb-1" style="font-family: 'Outfit', sans-serif;">Upload File</h3>
+                        <p class="text-muted font-13">Add assets, spreadsheets, or code records to your workspace vault.</p>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label class="form-label">Select File</label>
-                            {{ form.file }}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger shadow-sm mb-4">
+                                <h6 class="fw-bold mb-1"><i class="fas fa-exclamation-triangle me-2"></i>Please resolve:</h6>
+                                <ul class="mb-0 font-13 ps-3">
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <div class="row g-4">
+                            <!-- Select File -->
+                            <div class="col-12">
+                                <label for="id_file" class="form-label fw-semibold text-secondary font-13">Select File <span class="text-danger">*</span></label>
+                                {{ form.file }}
+                                {% if form.file.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.file.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Target Project Workspace -->
+                            <div class="col-12">
+                                <label for="id_project" class="form-label fw-semibold text-secondary font-13">Target Workspace <span class="text-danger">*</span></label>
+                                {{ form.project }}
+                                {% if form.project.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.project.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Optional Description -->
+                            <div class="col-12">
+                                <label for="id_description" class="form-label fw-semibold text-secondary font-13">Description (Optional)</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger font-12 mt-1">{{ form.description.errors|first }}</div>
+                                {% endif %}
+                            </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Project</label>
-                            {{ form.project }}
+
+                        <!-- Supported formats alert -->
+                        <div class="bg-primary-light border border-color rounded p-3 mt-4 mb-4 d-flex gap-3 align-items-center">
+                            <i class="fas fa-info-circle text-primary font-18"></i>
+                            <span class="font-12 text-secondary">Supported categories: <strong>PDFs, Images, Office Documents, Text files, and ZIP/TAR Archives</strong> up to 10MB in size.</span>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Description (Optional)</label>
-                            {{ form.description }}
-                        </div>
-                        
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            Supported file types: PDF, Images, Documents, Archives
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Upload</button>
-                            <a href="{% url 'file_list' %}" class="btn btn-secondary">Cancel</a>
+
+                        <!-- Submit actions -->
+                        <div class="d-flex flex-column gap-2 mt-2">
+                            <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-cloud-upload-alt font-12"></i> Upload File
+                            </button>
+                            <a href="{% url 'file_list' %}" class="btn btn-outline-secondary w-100">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -44,4 +86,20 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const fileInput = document.querySelector("#id_file");
+    if (fileInput) fileInput.classList.add("form-control");
+    
+    const projSelect = document.querySelector("#id_project");
+    if (projSelect) projSelect.classList.add("form-select");
+    
+    const descInput = document.querySelector("#id_description");
+    if (descInput) {
+        descInput.classList.add("form-control");
+        descInput.rows = 3;
+    }
+});
+</script>
 {% endblock %}

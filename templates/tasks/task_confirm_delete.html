@@ -1,24 +1,35 @@
 {% extends 'base.html' %}
 
-{% block title %}Delete Task - {{ task.title }}{% endblock %}
+{% block title %}Delete Task - {{ task.title }} | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-danger text-white">
-                    <h4>Confirm Delete</h4>
-                </div>
-                <div class="card-body">
-                    <p>Are you sure you want to delete the task <strong>"{{ task.title }}"</strong>?</p>
-                    <p class="text-danger">This action cannot be undone.</p>
-                    
-                    <form method="post">
+        <div class="col-lg-5 col-md-8">
+            <div class="card border-0 shadow-lg" style="border-top: 4px solid var(--danger) !important;">
+                <div class="card-body p-4 p-md-5 text-center">
+                    <div class="rounded-circle bg-badge-danger mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-trash-alt text-danger font-36"></i>
+                    </div>
+
+                    <h3 class="fw-bold text-dark-mode-light mb-2" style="font-family: 'Outfit', sans-serif;">Delete Action Item?</h3>
+                    <p class="text-secondary font-14 mb-4">
+                        Are you sure you want to permanently delete task <strong class="text-dark-mode-light">"{{ task.title }}"</strong>?
+                    </p>
+
+                    <div class="bg-badge-danger text-start rounded p-3 mb-4 border border-danger border-opacity-10 text-center font-12 fw-semibold text-danger">
+                        <i class="fas fa-exclamation-triangle me-1"></i> Warning: This operation cannot be undone. All logs for this task will be removed.
+                    </div>
+
+                    <form method="post" class="mt-4">
                         {% csrf_token %}
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'task_detail' task.id %}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a href="{% url 'task_detail' task.id %}" class="btn btn-outline-secondary px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger px-4">
+                                Yes, Delete Task
+                            </button>
                         </div>
                     </form>
                 </div>

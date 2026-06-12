@@ -1,67 +1,91 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Files - Project Management System{% endblock %}
+{% block title %}File Vault | AuraPMS{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Project Files</h2>
-        <a href="{% url 'file_upload' %}" class="btn btn-primary">
-            <i class="fas fa-upload"></i> Upload File
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">File Vault</h2>
+            <p class="text-muted font-14 mb-0">Manage and share documents, images, and archives within your workspace.</p>
+        </div>
+        <a href="{% url 'file_upload' %}" class="btn btn-primary shadow-sm d-flex align-items-center gap-2">
+            <i class="fas fa-upload font-12"></i> Upload File
         </a>
     </div>
     
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-6">
-                    <input type="text" name="search" class="form-control" placeholder="Search files..." value="{{ search_query }}">
+    <!-- Filters Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-lg-6 col-md-5">
+                    <div class="position-relative">
+                        <input type="text" name="search" class="form-control ps-4" placeholder="Search files by filename..." value="{{ search_query|default:'' }}">
+                        <i class="fas fa-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%);"></i>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <select name="type" class="form-control">
-                        <option value="">All Types</option>
+                <div class="col-lg-4 col-md-4">
+                    <select name="type" class="form-select">
+                        <option value="">All File Types</option>
                         <option value="DOCUMENT" {% if file_type == 'DOCUMENT' %}selected{% endif %}>Documents</option>
                         <option value="IMAGE" {% if file_type == 'IMAGE' %}selected{% endif %}>Images</option>
                         <option value="PDF" {% if file_type == 'PDF' %}selected{% endif %}>PDFs</option>
                         <option value="ARCHIVE" {% if file_type == 'ARCHIVE' %}selected{% endif %}>Archives</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <div class="col-lg-2 col-md-3">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-2"></i>Filter</button>
                 </div>
             </form>
         </div>
     </div>
     
     <!-- Files Grid -->
-    <div class="row">
+    <div class="row g-4">
         {% for file in files %}
-            <div class="col-md-3 mb-4">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div class="file-icon mb-3">
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="card h-100 border-0 shadow-sm file-card" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div class="card-body p-4 text-center d-flex flex-column align-items-center position-relative">
+                        <!-- Format badge -->
+                        <span class="badge bg-light text-secondary border font-9 position-absolute" style="top: 15px; right: 15px;">
+                            {{ file.get_file_extension }}
+                        </span>
+                        
+                        <!-- File Icon -->
+                        <div class="rounded-circle bg-secondary-hover d-flex align-items-center justify-content-center mb-3 mt-2" style="width: 70px; height: 70px;">
                             {% if file.file_type == 'PDF' %}
-                                <i class="fas fa-file-pdf fa-4x text-danger"></i>
+                                <i class="far fa-file-pdf text-danger font-30"></i>
                             {% elif file.file_type == 'IMAGE' %}
-                                <i class="fas fa-file-image fa-4x text-primary"></i>
+                                <i class="far fa-file-image text-success font-30"></i>
                             {% elif file.file_type == 'DOCUMENT' %}
-                                <i class="fas fa-file-word fa-4x text-info"></i>
+                                <i class="far fa-file-word text-primary font-30"></i>
+                            {% elif file.file_type == 'ARCHIVE' %}
+                                <i class="far fa-file-archive text-warning font-30"></i>
                             {% else %}
-                                <i class="fas fa-file fa-4x text-secondary"></i>
+                                <i class="far fa-file-alt text-secondary font-30"></i>
                             {% endif %}
                         </div>
-                        <h6 class="card-title">{{ file.filename|truncatechars:20 }}</h6>
-                        <p class="text-muted small">
-                            {{ file.get_file_size_display }}<br>
-                            Uploaded by {{ file.uploaded_by.username }}
+                        
+                        <!-- File Info -->
+                        <h6 class="fw-bold text-dark-mode-light mb-1 text-truncate font-14 w-100" title="{{ file.filename }}">
+                            {{ file.filename }}
+                        </h6>
+                        <p class="text-muted font-11 mb-2">
+                            Workspace: <strong class="text-secondary">{{ file.project.name|default:"Global" }}</strong>
                         </p>
-                        <div class="btn-group w-100">
-                            <a href="{% url 'file_download' file.id %}" class="btn btn-sm btn-success">
-                                <i class="fas fa-download"></i> Download
+                        <p class="text-muted font-11 mb-4">
+                            Size: {{ file.get_file_size_display }} &bull; Uploaded by: {{ file.uploaded_by.get_full_name|default:file.uploaded_by.username }}
+                        </p>
+                        
+                        <!-- Actions -->
+                        <div class="mt-auto w-100 pt-3 border-top border-color d-flex gap-2">
+                            <a href="{% url 'file_download' file.id %}" class="btn btn-primary btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1">
+                                <i class="fas fa-download font-10"></i> Download
                             </a>
-                            <a href="{% url 'file_delete' file.id %}" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
+                            <a href="{% url 'file_delete' file.id %}" class="btn btn-outline-danger btn-sm px-2.5 d-flex align-items-center justify-content-center" title="Delete file">
+                                <i class="fas fa-trash font-10"></i>
                             </a>
                         </div>
                     </div>
@@ -69,9 +93,27 @@
             </div>
         {% empty %}
             <div class="col-12">
-                <div class="alert alert-info">No files found. Upload your first file!</div>
+                <div class="card border-0 shadow-sm p-5 text-center text-muted">
+                    <i class="far fa-folder-open fa-4x mb-3 text-muted"></i>
+                    <h5 class="fw-bold text-dark-mode-light">No Files Found</h5>
+                    <p class="font-13 mb-0">Use the upload button above to add documents or media to the vault.</p>
+                </div>
             </div>
         {% endfor %}
     </div>
 </div>
+
+<style>
+.file-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md) !important;
+}
+.bg-secondary-hover {
+    background-color: var(--bg-secondary);
+    transition: background-color 0.2s;
+}
+.file-card:hover .bg-secondary-hover {
+    background-color: var(--primary-light);
+}
+</style>
 {% endblock %}

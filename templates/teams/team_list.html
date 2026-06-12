@@ -1,35 +1,78 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Teams - Project Management System{% endblock %}
+{% block title %}Teams | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Teams</h2>
-        <a href="{% url 'team_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Team
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Workspace Teams</h2>
+            <p class="text-muted font-14 mb-0">Manage and assign teams to different workspace components.</p>
+        </div>
+        <a href="{% url 'team_create' %}" class="btn btn-primary shadow-sm d-flex align-items-center gap-2">
+            <i class="fas fa-plus font-12"></i> Create Team
         </a>
     </div>
     
-    <div class="row">
+    <!-- Active Teams Grid -->
+    <div class="row g-4 mt-2">
         {% for team in teams %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ team.name }}</h5>
-                        <p class="card-text">{{ team.description|truncatewords:20 }}</p>
-                        <hr>
-                        <p><strong>Team Lead:</strong> {{ team.team_lead.get_full_name }}</p>
-                        <p><strong>Members:</strong> {{ team.member_count }}</p>
-                        <a href="{% url 'team_detail' team.id %}" class="btn btn-primary">View Team</a>
+            <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="card h-100 border-0 shadow-sm team-card" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <!-- Icon & Title Row -->
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="rounded-circle bg-primary-light d-flex align-items-center justify-content-center text-primary" style="width: 50px; height: 50px; flex-shrink: 0;">
+                                <i class="fas fa-users font-20"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark-mode-light mb-1" style="font-family: 'Outfit', sans-serif;">{{ team.name }}</h5>
+                                <span class="badge bg-badge-primary font-10">Lead: {{ team.team_lead.get_full_name|default:team.team_lead.username }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <p class="text-muted font-13 mb-4 text-truncate-3" style="max-height: 60px; overflow: hidden; line-height: 1.5;">
+                            {{ team.description|default:"No description provided for this team workspace." }}
+                        </p>
+
+                        <!-- Bottom Meta -->
+                        <div class="mt-auto pt-3 border-top border-color d-flex justify-content-between align-items-center">
+                            <span class="font-12 text-muted fw-semibold">
+                                <i class="fas fa-user-friends me-1"></i>{{ team.member_count }} Members
+                            </span>
+                            <a href="{% url 'team_detail' team.id %}" class="btn btn-outline-primary btn-sm px-3 font-12 fw-semibold">
+                                View Details
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         {% empty %}
             <div class="col-12">
-                <div class="alert alert-info">No teams found. Create your first team!</div>
+                <div class="card border-0 shadow-sm p-5 text-center text-muted">
+                    <i class="fas fa-users-slash fa-4x mb-3 text-muted"></i>
+                    <h5 class="fw-bold text-dark-mode-light">No Teams Registered</h5>
+                    <p class="font-13 mb-0">Get started by creating your first workspace team above.</p>
+                </div>
             </div>
         {% endfor %}
     </div>
 </div>
+
+<style>
+.team-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md) !important;
+}
+.text-truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
 {% endblock %}

@@ -1,93 +1,191 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Calendar View - Project Management System{% endblock %}
+{% block title %}Calendar Schedule | AuraPMS{% endblock %}
 
 {% block extra_css %}
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
 <style>
-.fc-event {
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.fc-event:hover {
-    transform: scale(1.02);
-}
-.fc-event-title {
-    font-weight: 500;
-}
-.calendar-container {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-.event-highlight {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
+    /* FullCalendar Premium Custom Styling */
+    .fc {
+        font-family: var(--font-primary) !important;
+    }
+    
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: var(--border-color) !important;
+    }
+    
+    .fc-theme-standard .fc-scrollgrid {
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+    
+    .fc .fc-toolbar-title {
+        font-family: var(--font-headers) !important;
+        font-weight: 700;
+        font-size: 1.35rem !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Style FullCalendar buttons to match AuraPMS theme */
+    .fc .fc-button-primary {
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-secondary) !important;
+        font-weight: 500 !important;
+        text-transform: capitalize !important;
+        padding: 6px 14px !important;
+        font-size: 0.875rem !important;
+        box-shadow: var(--shadow-sm) !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .fc .fc-button-primary:hover {
+        background-color: var(--bg-secondary) !important;
+        color: var(--primary) !important;
+        border-color: var(--border-hover) !important;
+    }
+    
+    .fc .fc-button-primary:disabled {
+        background-color: var(--bg-secondary) !important;
+        color: var(--text-muted) !important;
+        opacity: 0.6;
+    }
+    
+    .fc .fc-button-active {
+        background-color: var(--primary-light) !important;
+        border-color: var(--primary) !important;
+        color: var(--primary) !important;
+        font-weight: 600 !important;
+    }
+    
+    .fc .fc-today-button {
+        font-weight: 600 !important;
+    }
+    
+    /* Day cells */
+    .fc .fc-daygrid-day-number {
+        color: var(--text-secondary) !important;
+        font-size: 0.85rem !important;
+        padding: 8px !important;
+        font-weight: 500;
+        text-decoration: none !important;
+    }
+    
+    .fc .fc-col-header-cell-cushion {
+        color: var(--text-muted) !important;
+        text-transform: uppercase !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.5px !important;
+        padding: 10px 0 !important;
+        text-decoration: none !important;
+    }
+
+    .fc-day-today {
+        background-color: var(--bg-secondary) !important;
+    }
+
+    /* Event bubbles */
+    .fc-v-event, .fc-h-event {
+        border: none !important;
+        border-radius: 6px !important;
+        padding: 2px 6px !important;
+        box-shadow: var(--shadow-sm) !important;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    
+    .fc-event:hover {
+        transform: translateY(-1px) scale(1.01);
+        box-shadow: var(--shadow-md) !important;
+    }
+
+    .fc-event-title-container {
+        padding: 2px 4px;
+    }
+
+    .fc-event-title {
+        font-weight: 600 !important;
+        font-size: 0.775rem !important;
+    }
+
+    /* Dark mode adjustments */
+    .dark-mode .fc-theme-standard td, .dark-mode .fc-theme-standard th {
+        border-color: #26354a !important;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-calendar-alt"></i> Calendar View</h2>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <button class="btn btn-outline-primary" onclick="refreshCalendar()">
+            <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Calendar Schedule</h2>
+            <p class="text-muted font-14 mb-0">Track all project deliverables, milestones, and task deadlines visually.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary d-flex align-items-center gap-2" onclick="refreshCalendar()">
                 <i class="fas fa-sync-alt"></i> Refresh
             </button>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">
+            <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addEventModal">
                 <i class="fas fa-plus"></i> Add Task
             </button>
         </div>
     </div>
     
-    <div class="calendar-container">
-        <div id="calendar"></div>
+    <!-- Calendar Card Container -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div id="calendar" style="min-height: 650px;"></div>
+        </div>
     </div>
 </div>
 
 <!-- Add Task Modal -->
-<div class="modal fade" id="addEventModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Task</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--border-radius-lg);">
+            <div class="modal-header border-bottom border-color p-4">
+                <h5 class="modal-title fw-bold text-dark-mode-light" id="addEventModalLabel" style="font-family: 'Outfit', sans-serif;">Add New Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <form id="quickTaskForm">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label">Task Title</label>
-                        <input type="text" name="title" class="form-control" required>
+                        <label class="form-label fw-semibold text-secondary font-13">Task Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" placeholder="Action item title..." required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Project</label>
-                        <select name="project_id" class="form-control" required>
-                            <option value="">Select Project</option>
+                        <label class="form-label fw-semibold text-secondary font-13">Target Workspace <span class="text-danger">*</span></label>
+                        <select name="project_id" class="form-select" required>
+                            <option value="">Select Target Project</option>
                             {% for project in projects %}
                                 <option value="{{ project.id }}">{{ project.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Deadline</label>
-                        <input type="datetime-local" name="deadline" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Priority</label>
-                        <select name="priority" class="form-control">
-                            <option value="HIGH">High</option>
-                            <option value="MEDIUM" selected>Medium</option>
-                            <option value="LOW">Low</option>
-                        </select>
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary font-13">Deadline <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="deadline" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary font-13">Priority</label>
+                            <select name="priority" class="form-select">
+                                <option value="HIGH">High</option>
+                                <option value="MEDIUM" selected>Medium</option>
+                                <option value="LOW">Low</option>
+                            </select>
+                        </div>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="createQuickTask()">Create Task</button>
+            <div class="modal-footer border-top border-color p-3">
+                <button type="button" class="btn btn-outline-secondary font-14 px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary font-14 px-4" onclick="createQuickTask()">Create Task</button>
             </div>
         </div>
     </div>
@@ -108,20 +206,24 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         events: '/api/calendar/events/',
         eventClick: function(info) {
-            window.location.href = info.event.url;
+            if (info.event.url) {
+                info.jsEvent.preventDefault();
+                window.location.href = info.event.url;
+            }
         },
         eventDidMount: function(info) {
             const priority = info.event.extendedProps.priority;
+            // Map colors to variables in style.css: --danger (#f43f5e), --warning (#f59e0b), --success (#10b981)
             if (priority === 'HIGH') {
-                info.el.style.backgroundColor = '#dc3545';
+                info.el.style.backgroundColor = '#f43f5e';
             } else if (priority === 'MEDIUM') {
-                info.el.style.backgroundColor = '#ffc107';
+                info.el.style.backgroundColor = '#f59e0b';
             } else {
-                info.el.style.backgroundColor = '#28a745';
+                info.el.style.backgroundColor = '#10b981';
             }
             
             if (info.event.extendedProps.is_overdue) {
-                info.el.style.border = '2px solid #000';
+                info.el.style.border = '2px solid var(--text-primary)';
             }
         },
         dayMaxEvents: true,
@@ -156,7 +258,7 @@ function updateTaskDeadline(taskId, newDeadline) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast('Deadline updated successfully', 'success');
+            showToast('Task deadline updated successfully', 'success');
         } else {
             showToast('Error updating deadline', 'danger');
             calendar.refetchEvents();

@@ -1,28 +1,61 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat Channels | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Select a Team to Chat</h2>
-    <div class="row mt-4">
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Team Chat Channels</h2>
+        <p class="text-muted font-14 mb-0">Select a workspace team channel to participate in real-time discussions.</p>
+    </div>
+
+    <!-- Active Teams Channels Grid -->
+    <div class="row g-4 mt-2">
         {% for team in teams %}
-        <div class="col-md-4 mb-3">
-            <a href="{% url 'chat_room' team_id=team.id %}" class="text-decoration-none">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">{{ team.name }}</h5>
-                        <p class="card-text text-muted">
-                            {{ team.members.count }} members
-                        </p>
+            <div class="col-lg-4 col-md-6 col-sm-12">
+                <a href="{% url 'chat_room' team_id=team.id %}" class="text-decoration-none h-100 d-block">
+                    <div class="card h-100 border-0 shadow-sm card-premium" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                        <div class="card-body p-4 text-center d-flex flex-column align-items-center">
+                            <!-- Custom Icon Container -->
+                            <div class="rounded-circle bg-primary-light d-flex align-items-center justify-content-center text-primary mb-3" style="width: 70px; height: 70px;">
+                                <i class="fas fa-hashtag font-30"></i>
+                            </div>
+                            
+                            <h5 class="fw-bold text-dark-mode-light mb-2" style="font-family: 'Outfit', sans-serif;">{{ team.name }}</h5>
+                            <p class="text-muted font-13 mb-4 text-truncate-2" style="max-height: 40px; overflow: hidden;">
+                                {{ team.description|default:"Collaborative discussion channel for team members." }}
+                            </p>
+
+                            <div class="mt-auto w-100 pt-3 border-top border-color d-flex justify-content-between align-items-center">
+                                <span class="font-12 text-muted fw-semibold">
+                                    <i class="fas fa-users me-1"></i>{{ team.members.count }} Members
+                                </span>
+                                <span class="text-primary font-12 fw-bold d-inline-flex align-items-center gap-1">
+                                    Open Channel <i class="fas fa-arrow-right font-10"></i>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </a>
-        </div>
+                </a>
+            </div>
         {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info">You are not a member of any team.</div>
-        </div>
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-5 text-center text-muted">
+                    <i class="far fa-comments fa-4x mb-3 text-muted"></i>
+                    <h5 class="fw-bold text-dark-mode-light">No Active Channels Found</h5>
+                    <p class="font-13 mb-0">You are not registered in any team workspace. Please contact your administrator.</p>
+                </div>
+            </div>
         {% endfor %}
     </div>
 </div>
+
+<style>
+.card-premium:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md) !important;
+}
+</style>
 {% endblock %}

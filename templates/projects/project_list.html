@@ -1,115 +1,143 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Projects | AuraPMS{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Projects</h2>
-        <a href="{% url 'project_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> New Project
+        <div>
+            <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Projects Vault</h2>
+            <p class="text-muted font-14 mb-0">Overview of all active and completed workspaces.</p>
+        </div>
+        <a href="{% url 'project_create' %}" class="btn btn-primary shadow-sm d-flex align-items-center gap-2">
+            <i class="fas fa-plus font-12"></i> New Project
         </a>
     </div>
     
     <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5>Total Projects</h5>
+    <div class="row g-4 mb-4">
+        <div class="col-md-4 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary shadow-sm">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <div class="stat-info">
                     <h3>{{ total_projects }}</h3>
+                    <p>Total Projects</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5>Completed</h5>
+        <div class="col-md-4 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-success shadow-sm">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
                     <h3>{{ completed_projects }}</h3>
+                    <p>Completed</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <h5>In Progress</h5>
+        <div class="col-md-4 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning shadow-sm">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <div class="stat-info">
                     <h3>{{ in_progress_projects }}</h3>
+                    <p>In Progress</p>
                 </div>
             </div>
         </div>
     </div>
     
     <!-- Search and Filter -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-6">
-                    <input type="text" name="search" class="form-control" placeholder="Search projects..." value="{{ search_query }}">
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-lg-6 col-md-5">
+                    <div class="position-relative">
+                        <input type="text" name="search" class="form-control ps-4" placeholder="Search projects by name or code..." value="{{ search_query|default:'' }}">
+                        <i class="fas fa-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%);"></i>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <select name="status" class="form-control">
-                        <option value="">All Status</option>
+                <div class="col-lg-4 col-md-4">
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
                         <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
                         <option value="IN_PROGRESS" {% if status_filter == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
                         <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <div class="col-lg-2 col-md-3">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-2"></i>Apply Filters</button>
                 </div>
             </form>
         </div>
     </div>
     
     <!-- Projects Table -->
-    <div class="card">
-        <div class="card-body">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover align-middle">
                     <thead>
                         <tr>
                             <th>Project Code</th>
-                            <th>Name</th>
+                            <th>Project Name</th>
                             <th>Priority</th>
                             <th>Status</th>
                             <th>Progress</th>
                             <th>Deadline</th>
-                            <th>Actions</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for project in projects %}
                         <tr>
-                            <td><strong>{{ project.project_code }}</strong></td>
-                            <td>{{ project.name }}</td>
+                            <td><span class="fw-bold text-primary">{{ project.project_code }}</span></td>
                             <td>
-                                <span class="badge bg-{% if project.priority == 'HIGH' %}danger{% elif project.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
+                                <div class="fw-semibold text-dark-mode-light">{{ project.name }}</div>
+                                <span class="text-muted font-11 d-none d-sm-inline">{{ project.description|truncatewords:8 }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-badge-{% if project.priority == 'HIGH' %}danger{% elif project.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
                                     {{ project.get_priority_display }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-{% if project.status == 'COMPLETED' %}success{% elif project.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %}">
+                                <span class="badge bg-badge-{% if project.status == 'COMPLETED' %}success{% elif project.status == 'IN_PROGRESS' %}primary{% else %}secondary{% endif %}">
                                     {{ project.get_status_display }}
                                 </span>
                             </td>
                             <td>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar" role="progressbar" style="width: {{ project.progress }}%">
-                                        {{ project.progress }}%
+                                <div class="d-flex align-items-center gap-2" style="max-width: 150px;">
+                                    <div class="progress flex-grow-1" style="height: 6px;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ project.progress }}%"></div>
                                     </div>
+                                    <span class="font-11 fw-bold text-muted">{{ project.progress }}%</span>
                                 </div>
                             </td>
-                            <td>{{ project.end_date }}</td>
-                            <td>
-                                <a href="{% url 'project_detail' project.id %}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'project_update' project.id %}" class="btn btn-sm btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                            <td><span class="text-muted font-13">{{ project.end_date }}</span></td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="{% url 'project_detail' project.id %}" class="btn btn-icon btn-sm bg-light text-primary" data-bs-toggle="tooltip" title="View details">
+                                        <i class="fas fa-eye font-12"></i>
+                                    </a>
+                                    <a href="{% url 'project_update' project.id %}" class="btn btn-icon btn-sm bg-light text-warning" data-bs-toggle="tooltip" title="Edit project">
+                                        <i class="fas fa-edit font-12"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center">No projects found.</td>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fas fa-folder-open fa-3x mb-3 d-block text-muted"></i>
+                                No projects matching the criteria were found.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -118,23 +146,23 @@
             
             <!-- Pagination -->
             {% if projects.has_other_pages %}
-            <nav>
+            <nav class="my-4">
                 <ul class="pagination justify-content-center">
                     {% if projects.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ projects.previous_page_number }}">Previous</a>
+                            <a class="page-link shadow-none" href="?page={{ projects.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
                         </li>
                     {% endif %}
                     
                     {% for i in projects.paginator.page_range %}
                         <li class="page-item {% if projects.number == i %}active{% endif %}">
-                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            <a class="page-link shadow-none" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ i }}</a>
                         </li>
                     {% endfor %}
                     
                     {% if projects.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ projects.next_page_number }}">Next</a>
+                            <a class="page-link shadow-none" href="?page={{ projects.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
                         </li>
                     {% endif %}
                 </ul>

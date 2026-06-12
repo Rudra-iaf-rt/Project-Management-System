@@ -1,131 +1,181 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Tasks - Project Management System{% endblock %}
+{% block title %}Tasks Vault | AuraPMS{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Tasks</h2>
-        <a href="{% url 'task_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Task
+        <div>
+            <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Tasks Vault</h2>
+            <p class="text-muted font-14 mb-0">Overview of your action items and assignments.</p>
+        </div>
+        <a href="{% url 'task_create' %}" class="btn btn-primary shadow-sm d-flex align-items-center gap-2">
+            <i class="fas fa-plus font-12"></i> New Task
         </a>
     </div>
     
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5>Total Tasks</h5>
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary shadow-sm">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-info">
                     <h3>{{ total_tasks }}</h3>
+                    <p>Total Tasks</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5>Completed</h5>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-success shadow-sm">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
                     <h3>{{ completed_tasks }}</h3>
+                    <p>Completed</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <h5>Pending</h5>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning shadow-sm">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <div class="stat-info">
                     <h3>{{ pending_tasks }}</h3>
+                    <p>Pending</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <h5>Overdue</h5>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-danger shadow-sm">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
                     <h3>{{ overdue_tasks }}</h3>
+                    <p>Overdue</p>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" name="search" class="form-control" placeholder="Search tasks..." value="{{ search_query }}">
+    <!-- Search and Filter Form -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-lg-4 col-md-4">
+                    <div class="position-relative">
+                        <input type="text" name="search" class="form-control ps-4" placeholder="Search tasks by name..." value="{{ search_query|default:'' }}">
+                        <i class="fas fa-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%);"></i>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <select name="status" class="form-control">
-                        <option value="">All Status</option>
+                <div class="col-lg-3 col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
                         <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
                         <option value="IN_PROGRESS" {% if status_filter == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
                         <option value="TESTING" {% if status_filter == 'TESTING' %}selected{% endif %}>Testing</option>
                         <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <select name="priority" class="form-control">
-                        <option value="">All Priority</option>
+                <div class="col-lg-3 col-md-3">
+                    <select name="priority" class="form-select">
+                        <option value="">All Priorities</option>
                         <option value="HIGH" {% if priority_filter == 'HIGH' %}selected{% endif %}>High</option>
                         <option value="MEDIUM" {% if priority_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
                         <option value="LOW" {% if priority_filter == 'LOW' %}selected{% endif %}>Low</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <div class="col-lg-2 col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-2"></i>Filter</button>
                 </div>
             </form>
         </div>
     </div>
     
     <!-- Tasks Table -->
-    <div class="card">
-        <div class="card-body">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover align-middle">
                     <thead>
                         <tr>
+                            <th>Task Code</th>
                             <th>Title</th>
                             <th>Project</th>
                             <th>Assigned To</th>
                             <th>Priority</th>
                             <th>Status</th>
                             <th>Deadline</th>
-                            <th>Actions</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for task in tasks %}
                         <tr>
-                            <td>{{ task.title }}</td>
-                            <td>{{ task.project.name }}</td>
-                            <td>{{ task.assigned_to.get_full_name }}</td>
+                            <td><span class="fw-bold text-primary">{{ task.task_code|default:"--" }}</span></td>
                             <td>
-                                <span class="badge bg-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
+                                <div class="fw-semibold text-dark-mode-light">{{ task.title }}</div>
+                                <span class="text-muted font-11 d-none d-sm-inline">{{ task.description|truncatewords:8 }}</span>
+                            </td>
+                            <td>
+                                <span class="text-secondary fw-semibold font-13">
+                                    <i class="far fa-folder me-1 text-muted"></i>{{ task.project.name|default:"Global" }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if task.assigned_to.profile_picture %}
+                                        <img src="{{ task.assigned_to.profile_picture.url }}" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center font-10 fw-bold" style="width: 28px; height: 28px;">
+                                            {{ task.assigned_to.first_name|first|upper }}{{ task.assigned_to.last_name|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <span class="font-13 text-secondary">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-badge-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %} text-uppercase font-10">
                                     {{ task.get_priority_display }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %}">
+                                <span class="badge bg-badge-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}primary{% elif task.status == 'TESTING' %}info{% else %}secondary{% endif %} text-uppercase font-10">
                                     {{ task.get_status_display }}
                                 </span>
                             </td>
-                            <td class="{% if task.is_overdue %}text-danger{% endif %}">
-                                {{ task.deadline|date:"M d, Y" }}
-                            </td>
                             <td>
-                                <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'task_update' task.id %}" class="btn btn-sm btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                             </td>
-                         </tr>
+                                <span class="font-12 {% if task.is_overdue %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                    {{ task.deadline|date:"M d, Y" }}
+                                    {% if task.is_overdue %}
+                                        <i class="fas fa-exclamation-triangle ms-1" title="Overdue"></i>
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="{% url 'task_detail' task.id %}" class="btn btn-icon btn-sm bg-light text-primary" data-bs-toggle="tooltip" title="View details">
+                                        <i class="fas fa-eye font-12"></i>
+                                    </a>
+                                    <a href="{% url 'task_update' task.id %}" class="btn btn-icon btn-sm bg-light text-warning" data-bs-toggle="tooltip" title="Edit task">
+                                        <i class="fas fa-edit font-12"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
                         {% empty %}
-                         <tr>
-                            <td colspan="7" class="text-center">No tasks found.</td>
-                         </tr>
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="fas fa-clipboard-list fa-3x mb-3 d-block text-muted"></i>
+                                No tasks matching the criteria were found.
+                            </td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -133,23 +183,23 @@
             
             <!-- Pagination -->
             {% if tasks.has_other_pages %}
-            <nav>
+            <nav class="my-4">
                 <ul class="pagination justify-content-center">
                     {% if tasks.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ tasks.previous_page_number }}">Previous</a>
+                            <a class="page-link shadow-none" href="?page={{ tasks.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">Previous</a>
                         </li>
                     {% endif %}
                     
                     {% for i in tasks.paginator.page_range %}
                         <li class="page-item {% if tasks.number == i %}active{% endif %}">
-                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            <a class="page-link shadow-none" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">{{ i }}</a>
                         </li>
                     {% endfor %}
                     
                     {% if tasks.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ tasks.next_page_number }}">Next</a>
+                            <a class="page-link shadow-none" href="?page={{ tasks.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">Next</a>
                         </li>
                     {% endif %}
                 </ul>

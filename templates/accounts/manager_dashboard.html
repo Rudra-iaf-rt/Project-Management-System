@@ -1,57 +1,67 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Manager Dashboard - Project Management System{% endblock %}
+{% block title %}Manager Board | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Welcome Header -->
-    <div class="welcome-header mb-4">
-        <h1 class="display-5">Welcome, {{ request.user.get_full_name }}</h1>
-        <p class="lead">Project Manager Dashboard - Manage your projects and team</p>
+<div class="dashboard-container">
+    <!-- Header Block -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Manager Space</h2>
+            <p class="text-muted font-14 mb-0">Project Manager Dashboard - Oversee and sync with your team members.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'project_create' %}" class="btn btn-primary btn-sm d-flex align-items-center gap-2 shadow-sm">
+                <i class="fas fa-plus font-12"></i> Create Project
+            </a>
+        </div>
     </div>
-    
-    <!-- Stats Cards -->
+
+    <!-- Stats Grid -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="stats-card stats-card-primary">
-                <div class="stats-icon">
-                    <i class="fas fa-folder fa-2x"></i>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary shadow-sm">
+                    <i class="fas fa-folder"></i>
                 </div>
-                <div class="stats-info">
+                <div class="stat-info">
                     <h3>{{ total_projects }}</h3>
                     <p>My Projects</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card stats-card-success">
-                <div class="stats-icon">
-                    <i class="fas fa-check-circle fa-2x"></i>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-success shadow-sm">
+                    <i class="fas fa-check-circle"></i>
                 </div>
-                <div class="stats-info">
+                <div class="stat-info">
                     <h3>{{ completed_projects }}</h3>
                     <p>Completed</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card stats-card-info">
-                <div class="stats-icon">
-                    <i class="fas fa-spinner fa-2x"></i>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-info shadow-sm">
+                    <i class="fas fa-spinner"></i>
                 </div>
-                <div class="stats-info">
+                <div class="stat-info">
                     <h3>{{ active_projects }}</h3>
                     <p>Active Projects</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card stats-card-warning">
-                <div class="stats-icon">
-                    <i class="fas fa-users fa-2x"></i>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning shadow-sm">
+                    <i class="fas fa-users"></i>
                 </div>
-                <div class="stats-info">
+                <div class="stat-info">
                     <h3>{{ total_team_members }}</h3>
                     <p>Team Members</p>
                 </div>
@@ -59,83 +69,82 @@
         </div>
     </div>
     
-    <!-- Task Overview -->
+    <!-- Task & Project Statistics -->
     <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-tasks"></i> Task Statistics</h5>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 pb-0 bg-transparent">
+                    <h5 class="fw-bold mb-0">Manager Task Statistics</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row text-center mb-4">
+                    <div class="row text-center mb-4 g-2">
                         <div class="col-4">
-                            <div class="task-stat">
-                                <h3 class="text-primary">{{ total_tasks }}</h3>
-                                <small>Total Tasks</small>
+                            <div class="p-2 rounded bg-light border-0" style="background-color: var(--bg-secondary);">
+                                <h4 class="fw-bold mb-0 text-primary">{{ total_tasks }}</h4>
+                                <span class="text-muted font-11">Total Tasks</span>
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="task-stat">
-                                <h3 class="text-success">{{ completed_tasks }}</h3>
-                                <small>Completed</small>
+                            <div class="p-2 rounded bg-light border-0" style="background-color: var(--bg-secondary);">
+                                <h4 class="fw-bold mb-0 text-success">{{ completed_tasks }}</h4>
+                                <span class="text-muted font-11">Completed</span>
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="task-stat">
-                                <h3 class="text-warning">{{ pending_tasks }}</h3>
-                                <small>Pending</small>
+                            <div class="p-2 rounded bg-light border-0" style="background-color: var(--bg-secondary);">
+                                <h4 class="fw-bold mb-0 text-warning">{{ pending_tasks }}</h4>
+                                <span class="text-muted font-11">Pending</span>
                             </div>
                         </div>
                     </div>
-                    <canvas id="taskProgressChart" height="200"></canvas>
+                    <div id="managerTasksApexChart" style="min-height: 200px;"></div>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-line"></i> Project Progress</h5>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header border-0 pb-0 bg-transparent">
+                    <h5 class="fw-bold mb-0">Project Progress Timeline</h5>
                 </div>
-                <div class="card-body" style="max-height: 350px; overflow-y: auto;">
+                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
                     {% for project in projects %}
-                        <div class="project-progress-item mb-3">
+                        <div class="mb-3">
                             <div class="d-flex justify-content-between mb-1">
-                                <span>{{ project.name }}</span>
-                                <span>{{ project.progress }}%</span>
+                                <span class="fw-semibold font-14">{{ project.name }}</span>
+                                <span class="badge bg-badge-primary font-11">{{ project.progress }}%</span>
                             </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                     style="width: {{ project.progress }}%"></div>
+                            <div class="progress mb-2" style="height: 6px;">
+                                <div class="progress-bar" style="width: {{ project.progress }}%"></div>
                             </div>
-                            <small class="text-muted">
-                                Due: {{ project.end_date|date:"M d, Y" }} | 
-                                {{ project.days_remaining }} days left
-                            </small>
+                            <div class="d-flex justify-content-between text-muted font-11">
+                                <span>Due: {{ project.end_date|date:"M d, Y" }}</span>
+                                <span>{{ project.days_remaining }} days left</span>
+                            </div>
                         </div>
                     {% empty %}
-                        <p class="text-muted text-center">No projects found</p>
+                        <p class="text-muted text-center py-4 mb-0">No active projects managed.</p>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Recent Tasks -->
-    <div class="row g-4">
+    <!-- Recent Tasks Table -->
+    <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-clock"></i> Recent Tasks</h5>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 pb-0 bg-transparent">
+                    <h5 class="fw-bold mb-0">Recent Managed Tasks</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Task</th>
-                                    <th>Project</th>
-                                    <th>Assigned To</th>
+                                    <th>Task Title</th>
+                                    <th>Project Name</th>
+                                    <th>Assignee</th>
                                     <th>Priority</th>
                                     <th>Status</th>
                                     <th>Deadline</th>
@@ -145,31 +154,35 @@
                             <tbody>
                                 {% for task in recent_tasks %}
                                 <tr>
-                                    <td>{{ task.title }}</td>
-                                    <td>{{ task.project.name }}</td>
-                                    <td>{{ task.assigned_to.get_full_name }}</td>
+                                    <td class="fw-semibold">{{ task.title|truncatechars:35 }}</td>
+                                    <td><span class="text-secondary font-13">{{ task.project.name|truncatechars:20 }}</span></td>
                                     <td>
-                                        <span class="badge bg-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
+                                        <span class="text-secondary font-13">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-badge-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
                                             {{ task.get_priority_display }}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %}">
+                                        <span class="badge bg-badge-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}primary{% elif task.status == 'TESTING' %}info{% else %}secondary{% endif %}">
                                             {{ task.get_status_display }}
                                         </span>
                                     </td>
-                                    <td class="{% if task.is_overdue %}text-danger{% endif %}">
-                                        {{ task.deadline|date:"M d, Y" }}
+                                    <td>
+                                        <span class="text-muted font-13 {% if task.is_overdue %}text-danger fw-bold{% endif %}">
+                                            {{ task.deadline|date:"M d, Y" }}
+                                        </span>
                                     </td>
                                     <td>
-                                        <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
+                                        <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-icon bg-light text-primary">
+                                            <i class="fas fa-eye font-12"></i>
                                         </a>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="7" class="text-center">No tasks found</td>
+                                    <td colspan="7" class="text-center py-4 text-muted">No managed tasks found.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -180,99 +193,51 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-const ctx = document.getElementById('taskProgressChart')?.getContext('2d');
-if (ctx) {
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Pending', 'In Progress', 'Testing', 'Completed'],
-            datasets: [{
-                label: 'Task Count',
-                data: [{{ pending_tasks }}, {{ in_progress_tasks }}, {{ testing_tasks }}, {{ completed_tasks }}],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.5)',
-                    'rgba(54, 162, 235, 0.5)',
-                    'rgba(255, 206, 86, 0.5)',
-                    'rgba(75, 192, 192, 0.5)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
+    document.addEventListener("DOMContentLoaded", function() {
+        const isDark = document.body.classList.contains("dark-mode");
+        const themeTextColor = isDark ? "#94a3b8" : "#64748b";
+        const gridColor = isDark ? "#26354a" : "#e2e8f0";
+
+        if (document.querySelector("#managerTasksApexChart")) {
+            const taskOptions = {
+                chart: {
+                    type: 'bar',
+                    height: 240,
+                    toolbar: { show: false }
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        columnWidth: '45%',
+                        distributed: true
                     }
-                }
-            }
+                },
+                colors: ['#94a3b8', '#4f46e5', '#06b6d4', '#10b981'],
+                dataLabels: { enabled: false },
+                series: [{
+                    name: 'Count',
+                    data: [{{ pending_tasks }}, {{ in_progress_tasks }}, {{ testing_tasks }}, {{ completed_tasks }}]
+                }],
+                xaxis: {
+                    categories: ['Pending', 'In Progress', 'Testing', 'Completed'],
+                    labels: { style: { colors: themeTextColor } }
+                },
+                yaxis: {
+                    labels: {
+                        style: { colors: themeTextColor },
+                        formatter: function(val) { return Math.round(val); }
+                    }
+                },
+                grid: { borderColor: gridColor },
+                tooltip: { theme: isDark ? 'dark' : 'light' }
+            };
+            const taskChart = new ApexCharts(document.querySelector("#managerTasksApexChart"), taskOptions);
+            taskChart.render();
         }
     });
-}
 </script>
-
-<style>
-.stats-card {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    transition: transform 0.3s;
-}
-.stats-card:hover {
-    transform: translateY(-5px);
-}
-.stats-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.stats-card-primary .stats-icon {
-    background: rgba(13, 110, 253, 0.1);
-    color: #0d6efd;
-}
-.stats-card-success .stats-icon {
-    background: rgba(25, 135, 84, 0.1);
-    color: #198754;
-}
-.stats-card-info .stats-icon {
-    background: rgba(13, 202, 240, 0.1);
-    color: #0dcaf0;
-}
-.stats-card-warning .stats-icon {
-    background: rgba(255, 193, 7, 0.1);
-    color: #ffc107;
-}
-.stats-info h3 {
-    margin: 0;
-    font-size: 28px;
-}
-.stats-info p {
-    margin: 0;
-    color: #6c757d;
-    font-size: 14px;
-}
-.task-stat {
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-</style>
 {% endblock %}

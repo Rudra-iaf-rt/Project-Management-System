@@ -1,13 +1,31 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Dashboard | AuraPMS{% endblock %}
+
 {% block content %}
 <div class="dashboard-container">
-    <!-- Stats Cards -->
+    <!-- Header Block -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Workspace Dashboard</h2>
+            <p class="text-muted font-14 mb-0">Welcome back, {{ request.user.first_name|default:request.user.username }}! Here is your workspace summary.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'project_create' %}" class="btn btn-primary btn-sm d-flex align-items-center gap-2 shadow-sm">
+                <i class="fas fa-plus font-12"></i> New Project
+            </a>
+            <a href="{% url 'task_create' %}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                <i class="fas fa-tasks font-12"></i> Create Task
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6">
             <div class="stat-card">
-                <div class="stat-icon bg-primary">
+                <div class="stat-icon bg-primary shadow-sm">
                     <i class="fas fa-folder"></i>
                 </div>
                 <div class="stat-info">
@@ -17,9 +35,9 @@
             </div>
         </div>
         
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6">
             <div class="stat-card">
-                <div class="stat-icon bg-success">
+                <div class="stat-icon bg-success shadow-sm">
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="stat-info">
@@ -29,9 +47,9 @@
             </div>
         </div>
         
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6">
             <div class="stat-card">
-                <div class="stat-icon bg-warning">
+                <div class="stat-icon bg-warning shadow-sm">
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="stat-info">
@@ -41,9 +59,9 @@
             </div>
         </div>
         
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6">
             <div class="stat-card">
-                <div class="stat-icon bg-info">
+                <div class="stat-icon bg-info shadow-sm">
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="stat-info">
@@ -56,42 +74,44 @@
     
     <!-- Charts Row -->
     <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Project Progress</h5>
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 pb-0 bg-transparent">
+                    <h5 class="fw-bold mb-0">Project Progress Overview</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="projectProgressChart"></canvas>
+                    <div id="projectProgressApexChart" style="min-height: 300px;"></div>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Task Distribution</h5>
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 pb-0 bg-transparent">
+                    <h5 class="fw-bold mb-0">Task Distribution</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="taskDistributionChart"></canvas>
+                    <div id="taskDistributionApexChart" style="min-height: 300px;"></div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Recent Activities -->
+    <!-- Tasks and Deadlines Row -->
     <div class="row g-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Recent Tasks</h5>
+        <!-- Recent Tasks List -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 pb-0 bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Recent Tasks</h5>
+                    <a href="{% url 'task_list' %}" class="font-13 fw-semibold">View All</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Task</th>
+                                    <th>Task Title</th>
                                     <th>Project</th>
                                     <th>Priority</th>
                                     <th>Status</th>
@@ -101,19 +121,23 @@
                             <tbody>
                                 {% for task in recent_tasks %}
                                 <tr>
-                                    <td>{{ task.title }}</td>
-                                    <td>{{ task.project.name }}</td>
+                                    <td class="fw-semibold">{{ task.title }}</td>
+                                    <td><span class="text-secondary font-13">{{ task.project.name }}</span></td>
                                     <td>
-                                        <span class="priority-badge priority-{{ task.priority|lower }}">
+                                        <span class="badge bg-badge-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
                                             {{ task.get_priority_display }}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="status-badge status-{{ task.status|lower }}">
+                                        <span class="badge bg-badge-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}primary{% elif task.status == 'TESTING' %}info{% else %}secondary{% endif %}">
                                             {{ task.get_status_display }}
                                         </span>
                                     </td>
-                                    <td>{{ task.deadline|date:"M d, Y" }}</td>
+                                    <td><span class="text-muted font-13">{{ task.deadline|date:"M d, Y" }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">No recent tasks found.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -123,23 +147,28 @@
             </div>
         </div>
         
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Upcoming Deadlines</h5>
+        <!-- Upcoming Deadlines -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 pb-0 bg-transparent">
+                    <h5 class="fw-bold mb-0">Upcoming Deadlines</h5>
                 </div>
                 <div class="card-body">
-                    <div class="deadline-list">
+                    <div class="d-flex flex-column gap-3">
                         {% for task in upcoming_deadlines %}
-                        <div class="deadline-item">
-                            <div class="deadline-info">
-                                <h6>{{ task.title }}</h6>
-                                <small>{{ task.project.name }}</small>
+                        <div class="d-flex justify-content-between align-items-center p-3 rounded bg-secondary-light border-start border-3 border-{% if task.is_overdue %}danger{% else %}primary{% endif %}" style="background-color: var(--bg-secondary);">
+                            <div>
+                                <h6 class="fw-bold mb-1 font-14">{{ task.title }}</h6>
+                                <span class="text-muted font-11"><i class="fas fa-folder me-1"></i>{{ task.project.name }}</span>
                             </div>
-                            <div class="deadline-date {% if task.is_overdue %}text-danger{% endif %}">
-                                {{ task.deadline|date:"M d" }}
+                            <div class="text-end">
+                                <span class="badge bg-badge-{% if task.is_overdue %}danger{% else %}primary{% endif %} font-11">
+                                    {{ task.deadline|date:"M d" }}
+                                </span>
                             </div>
                         </div>
+                        {% empty %}
+                        <p class="text-muted text-center py-4 mb-0">No upcoming task deadlines.</p>
                         {% endfor %}
                     </div>
                 </div>
@@ -147,56 +176,72 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    // Project Progress Chart
-    const ctx1 = document.getElementById('projectProgressChart').getContext('2d');
-    new Chart(ctx1, {
-        type: 'bar',
-        data: {
-            labels: {{ project_names|safe }},
-            datasets: [{
-                label: 'Progress (%)',
-                data: {{ project_progress|safe }},
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100
+    document.addEventListener("DOMContentLoaded", function() {
+        const isDark = document.body.classList.contains("dark-mode");
+        const themeTextColor = isDark ? "#94a3b8" : "#64748b";
+        const gridColor = isDark ? "#26354a" : "#e2e8f0";
+
+        // 1. Project Progress ApexChart
+        const progressOptions = {
+            chart: {
+                type: 'bar',
+                height: 320,
+                toolbar: { show: false }
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    columnWidth: '50%',
+                    distributed: true
+                }
+            },
+            colors: ['#4f46e5', '#10b981', '#f59e0b', '#06b6d4', '#f43f5e', '#818cf8'],
+            dataLabels: { enabled: false },
+            series: [{
+                name: 'Completion',
+                data: {{ project_progress|safe }}
+            }],
+            xaxis: {
+                categories: {{ project_names|safe }},
+                labels: { style: { colors: themeTextColor } }
+            },
+            yaxis: {
+                max: 100,
+                labels: { style: { colors: themeTextColor } }
+            },
+            grid: { borderColor: gridColor },
+            tooltip: { theme: isDark ? 'dark' : 'light' }
+        };
+        const progressChart = new ApexCharts(document.querySelector("#projectProgressApexChart"), progressOptions);
+        progressChart.render();
+
+        // 2. Task Distribution ApexChart
+        const distributionOptions = {
+            chart: {
+                type: 'donut',
+                height: 320
+            },
+            series: {{ task_status_counts|safe }},
+            labels: ['Pending', 'In Progress', 'Testing', 'Completed'],
+            colors: ['#94a3b8', '#4f46e5', '#06b6d4', '#10b981'],
+            legend: {
+                position: 'bottom',
+                labels: { colors: themeTextColor }
+            },
+            tooltip: { theme: isDark ? 'dark' : 'light' },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) {
+                    return Math.round(val) + "%";
                 }
             }
-        }
-    });
-    
-    // Task Distribution Chart
-    const ctx2 = document.getElementById('taskDistributionChart').getContext('2d');
-    new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-            labels: ['Pending', 'In Progress', 'Testing', 'Completed'],
-            datasets: [{
-                data: {{ task_status_counts|safe }},
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.5)',
-                    'rgba(255, 206, 86, 0.5)',
-                    'rgba(54, 162, 235, 0.5)',
-                    'rgba(75, 192, 192, 0.5)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(75, 192, 192, 1)'
-                ],
-                borderWidth: 1
-            }]
-        }
+        };
+        const distributionChart = new ApexCharts(document.querySelector("#taskDistributionApexChart"), distributionOptions);
+        distributionChart.render();
     });
 </script>
 {% endblock %}

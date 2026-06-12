@@ -1,32 +1,40 @@
 {% extends 'base.html' %}
 
-{% block title %}Delete Project - {{ project.name }}{% endblock %}
+{% block title %}Delete Project - {{ project.name }} | AuraPMS{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0">Confirm Delete</h4>
-                </div>
-                <div class="card-body">
-                    <p>Are you sure you want to delete the project <strong>"{{ project.name }}"</strong>?</p>
-                    <p class="text-danger">This action cannot be undone and will also delete:</p>
-                    <ul>
-                        <li>All tasks associated with this project</li>
-                        <li>All files uploaded to this project</li>
-                        <li>All team assignments</li>
-                    </ul>
-                    
-                    <form method="post">
+        <div class="col-lg-5 col-md-8">
+            <div class="card border-0 shadow-lg" style="border-top: 4px solid var(--danger) !important;">
+                <div class="card-body p-4 p-md-5 text-center">
+                    <div class="rounded-circle bg-badge-danger mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-exclamation-triangle text-danger font-36"></i>
+                    </div>
+
+                    <h3 class="fw-bold text-dark-mode-light mb-2" style="font-family: 'Outfit', sans-serif;">Confirm Project Deletion</h3>
+                    <p class="text-secondary font-14 mb-4">
+                        Are you sure you want to permanently delete the project <strong class="text-dark-mode-light">"{{ project.name }}"</strong>?
+                    </p>
+
+                    <!-- Warning Details -->
+                    <div class="bg-badge-danger text-start rounded p-3 mb-4 border border-danger border-opacity-10">
+                        <h6 class="fw-bold text-danger mb-2 font-13"><i class="fas fa-info-circle me-1"></i> Critical Consequences:</h6>
+                        <ul class="mb-0 text-secondary font-12 ps-3 d-flex flex-column gap-1">
+                            <li>All related <strong>tasks</strong> will be deleted permanently.</li>
+                            <li>All <strong>uploaded files</strong> in the File Vault will be lost.</li>
+                            <li>All user project and manager assignments will be revoked.</li>
+                        </ul>
+                    </div>
+
+                    <form method="post" class="mt-4">
                         {% csrf_token %}
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary me-md-2">
-                                <i class="fas fa-times"></i> Cancel
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a href="{% url 'project_detail' project.id %}" class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-times me-2"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash"></i> Yes, Delete Project
+                            <button type="submit" class="btn btn-danger px-4">
+                                <i class="fas fa-trash me-2"></i> Yes, Delete Project
                             </button>
                         </div>
                     </form>

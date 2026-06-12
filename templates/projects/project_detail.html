@@ -1,251 +1,538 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ project.name }} - Project Details{% endblock %}
+{% block title %}{{ project.name }} - Details | AuraPMS{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Project Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h2>{{ project.name }}</h2>
-                            <p class="text-muted">Project Code: <strong>{{ project.project_code }}</strong></p>
-                            <p>{{ project.description }}</p>
-                        </div>
-                        <div>
-                            {% if can_edit %}
-                                <a href="{% url 'project_update' project.id %}" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a href="{% url 'project_delete' project.id %}" class="btn btn-danger">
-                                    <i class="fas fa-trash"></i> Delete
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <hr>
-                    
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="info-box">
-                                <label>Status</label>
-                                <div>
-                                    <span class="badge bg-{% if project.status == 'COMPLETED' %}success{% elif project.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %}">
-                                        {{ project.get_status_display }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="info-box">
-                                <label>Priority</label>
-                                <div>
-                                    <span class="badge bg-{% if project.priority == 'HIGH' %}danger{% elif project.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
-                                        {{ project.get_priority_display }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="info-box">
-                                <label>Timeline</label>
-                                <div>{{ project.start_date|date:"M d, Y" }} - {{ project.end_date|date:"M d, Y" }}</div>
-                                <small class="text-muted">{{ project.days_remaining }} days remaining</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="info-box">
-                                <label>Budget</label>
-                                <div>${{ project.budget|floatformat:2 }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Breadcrumb & Back navigation -->
+    <div class="mb-3">
+        <a href="{% url 'project_list' %}" class="text-muted text-decoration-none font-14 d-inline-flex align-items-center gap-1">
+            <i class="fas fa-arrow-left"></i> Back to Projects
+        </a>
     </div>
-    
-    <!-- Project Progress -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Project Progress</h5>
-                </div>
-                <div class="card-body">
-                    <div class="progress mb-3" style="height: 30px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                             role="progressbar" 
-                             style="width: {{ progress }}%">
-                            {{ progress }}% Complete
-                        </div>
+
+    <!-- Project Header Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-start g-3">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
+                        <span class="badge bg-badge-primary font-12 fw-bold">{{ project.project_code }}</span>
+                        <span class="badge bg-badge-{% if project.priority == 'HIGH' %}danger{% elif project.priority == 'MEDIUM' %}warning{% else %}success{% endif %} text-uppercase">
+                            {{ project.get_priority_display }} Priority
+                        </span>
+                        <span class="badge bg-badge-{% if project.status == 'COMPLETED' %}success{% elif project.status == 'IN_PROGRESS' %}primary{% else %}secondary{% endif %} text-uppercase">
+                            {{ project.get_status_display }}
+                        </span>
                     </div>
-                    
-                    <div class="row text-center mt-4">
-                        <div class="col-3">
-                            <h4>{{ task_stats.total }}</h4>
-                            <small>Total Tasks</small>
-                        </div>
-                        <div class="col-3">
-                            <h4 class="text-warning">{{ task_stats.pending }}</h4>
-                            <small>Pending</small>
-                        </div>
-                        <div class="col-3">
-                            <h4 class="text-info">{{ task_stats.in_progress }}</h4>
-                            <small>In Progress</small>
-                        </div>
-                        <div class="col-3">
-                            <h4 class="text-success">{{ task_stats.completed }}</h4>
-                            <small>Completed</small>
-                        </div>
-                    </div>
+                    <h2 class="fw-bold text-dark-mode-light mb-2" style="font-family: 'Outfit', sans-serif;">{{ project.name }}</h2>
+                    <p class="text-muted mb-0 font-14">{{ project.description|default:"No description provided for this project." }}</p>
                 </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'task_create' %}?project={{ project.id }}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Add New Task
-                        </a>
-                        <a href="{% url 'file_upload' %}?project={{ project.id }}" class="btn btn-info">
-                            <i class="fas fa-upload"></i> Upload File
-                        </a>
-                        <button class="btn btn-success" onclick="generateProjectReport()">
-                            <i class="fas fa-chart-line"></i> Generate Report
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Team Members -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5>Team Members</h5>
+                <div class="col-lg-4 text-lg-end d-flex flex-wrap gap-2 justify-content-lg-end">
                     {% if can_edit %}
-                        <a href="{% url 'project_assign' project.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-user-plus"></i> Manage Members
+                        <a href="{% url 'project_update' project.id %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <i class="fas fa-edit font-12"></i> Edit Project
+                        </a>
+                        <a href="{% url 'project_delete' project.id %}" class="btn btn-outline-danger d-inline-flex align-items-center gap-2">
+                            <i class="fas fa-trash font-12"></i> Delete
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Metrics Ribbon -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card py-3 px-4">
+                <div class="stat-icon bg-primary shadow-sm" style="width: 44px; height: 44px; font-size: 1.15rem;">
+                    <i class="fas fa-percent"></i>
+                </div>
+                <div class="stat-info">
+                    <h4 class="fw-bold mb-0">{{ progress }}%</h4>
+                    <p class="font-11 text-muted text-uppercase mb-0">Progress</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card py-3 px-4">
+                <div class="stat-icon bg-success shadow-sm" style="width: 44px; height: 44px; font-size: 1.15rem;">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h4 class="fw-bold mb-0">{{ project.days_remaining }}</h4>
+                    <p class="font-11 text-muted text-uppercase mb-0">Days Left</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card py-3 px-4">
+                <div class="stat-icon bg-info shadow-sm" style="width: 44px; height: 44px; font-size: 1.15rem;">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="stat-info">
+                    <h4 class="fw-bold mb-0">${{ project.budget|floatformat:0 }}</h4>
+                    <p class="font-11 text-muted text-uppercase mb-0">Budget</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card py-3 px-4">
+                <div class="stat-icon bg-warning shadow-sm" style="width: 44px; height: 44px; font-size: 1.15rem;">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-info">
+                    <h4 class="fw-bold mb-0">{{ task_stats.total }}</h4>
+                    <p class="font-11 text-muted text-uppercase mb-0">Total Tasks</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs border-bottom border-color mb-4" id="projectTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-semibold text-secondary px-4 py-3 border-0 bg-transparent position-relative" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true" style="transition: color 0.2s;">
+                <i class="fas fa-columns me-2"></i>Overview
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold text-secondary px-4 py-3 border-0 bg-transparent position-relative" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab" aria-controls="tasks" aria-selected="false" style="transition: color 0.2s;">
+                <i class="fas fa-tasks me-2"></i>Tasks ({{ task_stats.total }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold text-secondary px-4 py-3 border-0 bg-transparent position-relative" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab" aria-controls="files" aria-selected="false" style="transition: color 0.2s;">
+                <i class="fas fa-folder-open me-2"></i>File Vault ({{ project.files.all.count }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold text-secondary px-4 py-3 border-0 bg-transparent position-relative" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button" role="tab" aria-controls="team" aria-selected="false" style="transition: color 0.2s;">
+                <i class="fas fa-users me-2"></i>Team ({{ team_members.count|add:"1" }})
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="projectTabContent">
+        
+        <!-- OVERVIEW TAB -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+            <div class="row g-4">
+                <!-- Project Progress and Analytics -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-dark-mode-light mb-4" style="font-family: 'Outfit', sans-serif;">Task Distribution</h5>
+                            <div class="row align-items-center">
+                                <div class="col-md-5 mb-4 mb-md-0 d-flex justify-content-center">
+                                    <!-- Radial progress/chart container -->
+                                    <div id="overview-task-chart"></div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <div class="p-3 bg-secondary rounded border border-color">
+                                                <div class="text-muted font-11 text-uppercase fw-semibold mb-1">Pending</div>
+                                                <h4 class="fw-bold mb-0 text-secondary">{{ task_stats.pending }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-3 bg-primary-light rounded border border-color">
+                                                <div class="text-primary font-11 text-uppercase fw-semibold mb-1">In Progress</div>
+                                                <h4 class="fw-bold mb-0 text-primary">{{ task_stats.in_progress }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-3 bg-info-light rounded border border-color">
+                                                <div class="text-info font-11 text-uppercase fw-semibold mb-1">Testing</div>
+                                                <h4 class="fw-bold mb-0 text-info">{{ task_stats.testing }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-3 bg-success-light rounded border border-color">
+                                                <div class="text-success font-11 text-uppercase fw-semibold mb-1">Completed</div>
+                                                <h4 class="fw-bold mb-0 text-success">{{ task_stats.completed }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Tasks list -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center py-3">
+                            <h5 class="fw-bold text-dark-mode-light mb-0" style="font-family: 'Outfit', sans-serif;">Recent Tasks</h5>
+                            <a href="#tasks" onclick="document.getElementById('tasks-tab').click();" class="btn btn-link font-12 p-0 text-decoration-none">View All</a>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive border-0">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Task Name</th>
+                                            <th>Assignee</th>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>Deadline</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for task in tasks %}
+                                            <tr>
+                                                <td>
+                                                    <div class="fw-semibold text-dark-mode-light">{{ task.title }}</div>
+                                                    <span class="text-muted font-11">{{ task.task_code|default:"" }}</span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        {% if task.assigned_to.profile_picture %}
+                                                            <img src="{{ task.assigned_to.profile_picture.url }}" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;">
+                                                        {% else %}
+                                                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center font-11 fw-bold" style="width: 28px; height: 28px;">
+                                                                {{ task.assigned_to.first_name|first|upper }}{{ task.assigned_to.last_name|first|upper }}
+                                                            </div>
+                                                        {% endif %}
+                                                        <span class="font-13">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-badge-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %} text-uppercase font-10">
+                                                        {{ task.get_priority_display }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-badge-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}primary{% elif task.status == 'TESTING' %}info{% else %}secondary{% endif %} text-uppercase font-10">
+                                                        {{ task.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="font-12 {% if task.is_overdue %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                                        {{ task.deadline|date:"M d, Y" }}
+                                                        {% if task.is_overdue %}
+                                                            <i class="fas fa-exclamation-triangle ms-1" title="Overdue"></i>
+                                                        {% endif %}
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a href="{% url 'task_detail' task.id %}" class="btn btn-icon btn-sm" data-bs-toggle="tooltip" title="View details">
+                                                        <i class="fas fa-eye font-12"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="6" class="text-center py-5 text-muted">
+                                                    <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                                                    <p class="mb-0 font-13">No tasks found for this project.</p>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar Details / Quick Actions -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header border-0 bg-transparent py-3">
+                            <h5 class="fw-bold text-dark-mode-light mb-0" style="font-family: 'Outfit', sans-serif;">Quick Actions</h5>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'task_create' %}?project={{ project.id }}" class="btn btn-primary d-flex align-items-center justify-content-center gap-2">
+                                    <i class="fas fa-plus"></i> Create New Task
+                                </a>
+                                <a href="{% url 'file_upload' %}?project={{ project.id }}" class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2">
+                                    <i class="fas fa-upload"></i> Upload File
+                                </a>
+                                <button class="btn btn-outline-success d-flex align-items-center justify-content-center gap-2" onclick="generateProjectReport()">
+                                    <i class="fas fa-file-excel"></i> Export Project Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date & Budget Detail -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-dark-mode-light mb-3" style="font-family: 'Outfit', sans-serif;">Timeline Details</h5>
+                            <div class="d-flex flex-column gap-3">
+                                <div class="d-flex justify-content-between align-items-center border-bottom border-color pb-2">
+                                    <span class="text-muted font-13">Start Date</span>
+                                    <span class="fw-semibold text-dark-mode-light font-13">{{ project.start_date|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center border-bottom border-color pb-2">
+                                    <span class="text-muted font-13">End Date</span>
+                                    <span class="fw-semibold text-dark-mode-light font-13">{{ project.end_date|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted font-13">Days Remaining</span>
+                                    <span class="badge bg-badge-warning font-11 fw-bold">{{ project.days_remaining }} days</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Manager Information -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-dark-mode-light mb-3" style="font-family: 'Outfit', sans-serif;">Project Owner</h5>
+                            <div class="d-flex align-items-center gap-3">
+                                {% if project.project_manager.profile_picture %}
+                                    <img src="{{ project.project_manager.profile_picture.url }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center font-16 fw-bold shadow-sm" style="width: 50px; height: 50px;">
+                                        {{ project.project_manager.first_name|first|upper }}{{ project.project_manager.last_name|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <h6 class="fw-bold text-dark-mode-light mb-1">{{ project.project_manager.get_full_name|default:project.project_manager.username }}</h6>
+                                    <p class="text-muted font-12 mb-0">{{ project.project_manager.email }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TASKS TAB -->
+        <div class="tab-pane fade" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
+                    <h5 class="fw-bold text-dark-mode-light mb-0" style="font-family: 'Outfit', sans-serif;">Tasks in this Project</h5>
+                    <a href="{% url 'task_create' %}?project={{ project.id }}" class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+                        <i class="fas fa-plus font-11"></i> Add Task
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive border-0">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Task Code</th>
+                                    <th>Task Name</th>
+                                    <th>Assignee</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Deadline</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in project.tasks.all %}
+                                    <tr>
+                                        <td><span class="fw-bold text-primary font-13">{{ task.task_code|default:"--" }}</span></td>
+                                        <td>
+                                            <div class="fw-semibold text-dark-mode-light">{{ task.title }}</div>
+                                            <span class="text-muted font-11">{{ task.description|truncatewords:8 }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                {% if task.assigned_to.profile_picture %}
+                                                    <img src="{{ task.assigned_to.profile_picture.url }}" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;">
+                                                {% else %}
+                                                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center font-11 fw-bold" style="width: 28px; height: 28px;">
+                                                        {{ task.assigned_to.first_name|first|upper }}{{ task.assigned_to.last_name|first|upper }}
+                                                    </div>
+                                                {% endif %}
+                                                <span class="font-13">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-badge-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %} text-uppercase font-10">
+                                                {{ task.get_priority_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-badge-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}primary{% elif task.status == 'TESTING' %}info{% else %}secondary{% endif %} text-uppercase font-10">
+                                                {{ task.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="font-12 {% if task.is_overdue %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                                {{ task.deadline|date:"M d, Y" }}
+                                                {% if task.is_overdue %}
+                                                    <i class="fas fa-exclamation-triangle ms-1" title="Overdue"></i>
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <a href="{% url 'task_detail' task.id %}" class="btn btn-icon btn-sm bg-light text-primary" data-bs-toggle="tooltip" title="View details">
+                                                    <i class="fas fa-eye font-11"></i>
+                                                </a>
+                                                <a href="{% url 'task_update' task.id %}" class="btn btn-icon btn-sm bg-light text-warning" data-bs-toggle="tooltip" title="Edit task">
+                                                    <i class="fas fa-edit font-11"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <i class="fas fa-clipboard-list fa-3x mb-3 text-muted"></i>
+                                            <p class="mb-0">No tasks have been created for this project yet.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILE VAULT TAB -->
+        <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
+                    <h5 class="fw-bold text-dark-mode-light mb-0" style="font-family: 'Outfit', sans-serif;">File Vault</h5>
+                    <a href="{% url 'file_upload' %}?project={{ project.id }}" class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+                        <i class="fas fa-upload font-11"></i> Upload File
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive border-0">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Uploaded By</th>
+                                    <th>Upload Date</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for file_obj in project.files.all %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded bg-secondary-hover p-2 text-primary font-18 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    {% if file_obj.file_type == 'PDF' %}
+                                                        <i class="far fa-file-pdf text-danger"></i>
+                                                    {% elif file_obj.file_type == 'IMAGE' %}
+                                                        <i class="far fa-file-image text-success"></i>
+                                                    {% elif file_obj.file_type == 'DOCUMENT' %}
+                                                        <i class="far fa-file-word text-primary"></i>
+                                                    {% elif file_obj.file_type == 'ARCHIVE' %}
+                                                        <i class="far fa-file-archive text-warning"></i>
+                                                    {% else %}
+                                                        <i class="far fa-file-alt text-secondary"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold text-dark-mode-light font-14">{{ file_obj.filename }}</div>
+                                                    <span class="text-muted font-11">{{ file_obj.description|default:"No description" }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-secondary border font-10">{{ file_obj.get_file_type_display }}</span></td>
+                                        <td><span class="text-muted font-13">{{ file_obj.get_file_size_display }}</span></td>
+                                        <td>
+                                            <span class="font-13 fw-semibold text-dark-mode-light">
+                                                {{ file_obj.uploaded_by.get_full_name|default:file_obj.uploaded_by.username }}
+                                            </span>
+                                        </td>
+                                        <td><span class="text-muted font-13">{{ file_obj.uploaded_at|date:"M d, Y H:i" }}</span></td>
+                                        <td class="text-end">
+                                            <a href="{{ file_obj.file.url }}" download class="btn btn-icon btn-sm text-primary" data-bs-toggle="tooltip" title="Download file">
+                                                <i class="fas fa-download font-12"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="fas fa-folder-open fa-3x mb-3 text-muted"></i>
+                                            <p class="mb-0">No files uploaded to this vault yet.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEAM TAB -->
+        <div class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
+                    <h5 class="fw-bold text-dark-mode-light mb-0" style="font-family: 'Outfit', sans-serif;">Workspace Team Members</h5>
+                    {% if can_edit %}
+                        <a href="{% url 'project_assign' project.id %}" class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+                            <i class="fas fa-user-plus font-11"></i> Manage Team
                         </a>
                     {% endif %}
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="team-member-card text-center">
-                                <div class="member-icon">
-                                    <i class="fas fa-user-tie fa-3x"></i>
-                                </div>
-                                <h6>Project Manager</h6>
-                                <p class="mb-0">{{ project.project_manager.get_full_name }}</p>
-                                <small class="text-muted">{{ project.project_manager.email }}</small>
+                    <div class="row g-4">
+                        <!-- Manager Card -->
+                        <div class="col-lg-3 col-md-4 col-sm-6">
+                            <div class="card border-primary h-100 shadow-sm text-center p-4">
+                                {% if project.project_manager.profile_picture %}
+                                    <img src="{{ project.project_manager.profile_picture.url }}" class="rounded-circle mx-auto mb-3" style="width: 70px; height: 70px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center font-20 fw-bold shadow-sm" style="width: 70px; height: 70px;">
+                                        {{ project.project_manager.first_name|first|upper }}{{ project.project_manager.last_name|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <h6 class="fw-bold text-dark-mode-light mb-1">{{ project.project_manager.get_full_name|default:project.project_manager.username }}</h6>
+                                <p class="badge bg-badge-primary mb-2">Project Manager</p>
+                                <p class="text-muted font-11 mb-0"><i class="far fa-envelope me-1"></i>{{ project.project_manager.email }}</p>
                             </div>
                         </div>
-                        
+
+                        <!-- Team Members Cards -->
                         {% for member in team_members %}
-                            <div class="col-md-2">
-                                <div class="team-member-card text-center">
+                            <div class="col-lg-3 col-md-4 col-sm-6">
+                                <div class="card border border-color h-100 text-center p-4 position-relative">
+                                    {% if can_edit %}
+                                        <a href="{% url 'project_remove_member' project.id member.id %}" class="position-absolute text-danger font-12" style="top: 12px; right: 12px;" onclick="return confirm('Are you sure you want to remove {{ member.get_full_name|default:member.username }} from the project?')">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    {% endif %}
                                     {% if member.profile_picture %}
-                                        <img src="{{ member.profile_picture.url }}" alt="{{ member.username }}" class="rounded-circle mb-2" style="width: 60px; height: 60px;">
+                                        <img src="{{ member.profile_picture.url }}" class="rounded-circle mx-auto mb-3" style="width: 70px; height: 70px; object-fit: cover;">
                                     {% else %}
-                                        <div class="member-avatar bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+                                        <div class="bg-secondary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center font-20 fw-bold" style="width: 70px; height: 70px;">
                                             {{ member.first_name|first|upper }}{{ member.last_name|first|upper }}
                                         </div>
                                     {% endif %}
-                                    <h6>{{ member.get_full_name }}</h6>
-                                    <small class="text-muted">{{ member.designation|default:"Team Member" }}</small>
+                                    <h6 class="fw-bold text-dark-mode-light mb-1">{{ member.get_full_name|default:member.username }}</h6>
+                                    <p class="badge bg-light text-secondary border mb-2">{{ member.designation|default:"Contributor" }}</p>
+                                    <p class="text-muted font-11 mb-0"><i class="far fa-envelope me-1"></i>{{ member.email }}</p>
                                 </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-lg-9 text-center py-5 text-muted">
+                                <i class="fas fa-user-friends fa-2x mb-2"></i>
+                                <p class="mb-0 font-13">No members assigned to this workspace team yet.</p>
                             </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Recent Tasks -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Recent Tasks</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Task Title</th>
-                                    <th>Assigned To</th>
-                                    <th>Priority</th>
-                                    <th>Status</th>
-                                    <th>Deadline</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for task in tasks %}
-                                <tr>
-                                    <td>{{ task.title }}</td>
-                                    <td>{{ task.assigned_to.get_full_name }}</td>
-                                    <td>
-                                        <span class="badge bg-{% if task.priority == 'HIGH' %}danger{% elif task.priority == 'MEDIUM' %}warning{% else %}success{% endif %}">
-                                            {{ task.get_priority_display }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %}">
-                                            {{ task.get_status_display }}
-                                        </span>
-                                    </td>
-                                    <td class="{% if task.is_overdue %}text-danger{% endif %}">
-                                        {{ task.deadline|date:"M d, Y" }}
-                                        {% if task.is_overdue %}
-                                            <i class="fas fa-exclamation-triangle" title="Overdue"></i>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="6" class="text-center">No tasks found for this project.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="text-center mt-3">
-                        <a href="{% url 'task_list' %}?project={{ project.id }}" class="btn btn-link">
-                            View All Tasks <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+
     </div>
 </div>
 
 <script>
 function generateProjectReport() {
-    // AJAX call to generate project report
     fetch(`/reports/project-report/?project_id={{ project.id }}`, {
         method: 'POST',
         headers: {
@@ -262,6 +549,8 @@ function generateProjectReport() {
                 a.click();
                 a.remove();
             });
+        } else {
+            alert('Failed to generate report. Please try again.');
         }
     });
 }
@@ -280,32 +569,101 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-</script>
 
-<style>
-.info-box {
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 5px;
-}
-.info-box label {
-    display: block;
-    font-size: 12px;
-    color: #6c757d;
-    margin-bottom: 5px;
-}
-.team-member-card {
-    padding: 10px;
-    border-radius: 8px;
-    transition: transform 0.3s;
-}
-.team-member-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-.member-avatar {
-    font-size: 24px;
-    font-weight: bold;
-}
-</style>
+// Active tab highlighting and local storage preservation
+document.addEventListener("DOMContentLoaded", function() {
+    // URL hash check
+    const hash = window.location.hash;
+    if (hash) {
+        const tabEl = document.querySelector(`button[data-bs-target="${hash}"]`);
+        if (tabEl) {
+            const tab = new bootstrap.Tab(tabEl);
+            tab.show();
+        }
+    }
+
+    // Preserve active tab state on click
+    const tabTriggerList = [].slice.call(document.querySelectorAll('button[data-bs-toggle="tab"]'))
+    tabTriggerList.forEach(function (tabEl) {
+        tabEl.addEventListener('shown.bs.tab', function (event) {
+            window.location.hash = event.target.getAttribute('data-bs-target');
+        })
+    });
+
+    // ApexChart task completion overview
+    const pending = parseInt("{{ task_stats.pending }}") || 0;
+    const inProgress = parseInt("{{ task_stats.in_progress }}") || 0;
+    const testing = parseInt("{{ task_stats.testing }}") || 0;
+    const completed = parseInt("{{ task_stats.completed }}") || 0;
+    
+    const total = pending + inProgress + testing + completed;
+    
+    if (total > 0) {
+        const options = {
+            series: [pending, inProgress, testing, completed],
+            chart: {
+                type: 'donut',
+                height: 220,
+                sparkline: {
+                    enabled: false
+                }
+            },
+            colors: ['#64748b', '#4f46e5', '#06b6d4', '#10b981'],
+            labels: ['Pending', 'In Progress', 'Testing', 'Completed'],
+            legend: {
+                show: false
+            },
+            dataLabels: {
+                enabled: false
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '75%',
+                        labels: {
+                            show: true,
+                            name: {
+                                show: true,
+                                fontSize: '12px',
+                                fontFamily: 'Inter, sans-serif',
+                                color: '#64748b',
+                                offsetY: -5
+                            },
+                            value: {
+                                show: true,
+                                fontSize: '18px',
+                                fontFamily: 'Outfit, sans-serif',
+                                fontWeight: 'bold',
+                                color: 'var(--text-primary)',
+                                offsetY: 5,
+                                formatter: function (val) {
+                                    return val;
+                                }
+                            },
+                            total: {
+                                show: true,
+                                label: 'Total Tasks',
+                                color: '#64748b',
+                                formatter: function (w) {
+                                    return total;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        const chart = new ApexCharts(document.querySelector("#overview-task-chart"), options);
+        chart.render();
+    } else {
+        document.querySelector("#overview-task-chart").innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-clipboard-list fa-3x text-muted mb-2"></i>
+                <p class="text-muted font-13 mb-0">Add tasks to view stats.</p>
+            </div>
+        `;
+    }
+});
+</script>
 {% endblock %}
