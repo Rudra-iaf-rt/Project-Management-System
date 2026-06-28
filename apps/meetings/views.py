@@ -44,10 +44,10 @@ def meeting_room(request, meeting_code):
     
     # Validate permission: check if meeting is project/team locked
     if meeting.host != request.user and request.user.role != 'SUPER_ADMIN':
-        if meeting.project and request.user not in meeting.project.team_members.all():
+        if meeting.project and not meeting.project.team_members.filter(id=request.user.id).exists():
             messages.error(request, "You are not a member of this project workspace.")
             return redirect('meeting_dashboard')
-        if meeting.team and request.user not in meeting.team.members.all():
+        if meeting.team and not meeting.team.members.filter(id=request.user.id).exists():
             messages.error(request, "You are not a member of this team.")
             return redirect('meeting_dashboard')
 
