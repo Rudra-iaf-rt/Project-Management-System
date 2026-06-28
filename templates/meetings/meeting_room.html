@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ meeting.title }} | AuraPMS Meeting</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 & Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Meeting CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/meeting.css' %}">
+</head>
+<body class="meeting-mode">
+    <div class="meeting-container">
+        <!-- Main Stage & Header -->
+        <div class="meeting-main">
+            <!-- Header Bar -->
+            <div class="meeting-header">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="h4 fw-bold text-white mb-0" style="font-family:'Outfit', sans-serif;"><i class="fas fa-cubes text-primary me-2"></i>AuraPMS</span>
+                    <span class="text-white-50">|</span>
+                    <h1 class="meeting-title">{{ meeting.title }}</h1>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="meeting-timer" id="meetingTimer">00:00:00</div>
+                    <span class="badge bg-primary px-3 py-2 font-13" id="meetingCodeBadge">{{ meeting.meeting_code }}</span>
+                </div>
+            </div>
+
+            <!-- Dynamic Video Grid -->
+            <div class="video-stage" id="videoStage" data-meeting-code="{{ meeting.meeting_code }}" data-username="{{ request.user.username }}" data-is-host="{% if is_host %}true{% else %}false{% endif %}">
+                <!-- Local Video Tile -->
+                <div class="video-tile" id="tile-local">
+                    <video id="localVideo" autoplay playsinline muted></video>
+                    <div class="avatar-fallback" style="display:none;">
+                        <div class="avatar-circle">{{ request.user.username|slice:":1"|upper }}</div>
+                        <h6 class="text-white mb-0">{{ request.user.username }} (You)</h6>
+                    </div>
+                    <div class="participant-label">
+                        <span>{{ request.user.username }} (You) {% if is_host %}(Host){% endif %}</span>
+                    </div>
+                    <div class="participant-indicators">
+                        <div class="status-badge mic-status"><i class="fas fa-microphone"></i></div>
+                    </div>
+                </div>
+                <!-- Remote Tiles appended via WebRTC JS -->
+            </div>
+
+            <!-- Floating Bottom Control Toolbar -->
+            <div class="meeting-toolbar">
+                <button class="control-btn active" id="btnMic" title="Toggle Microphone"><i class="fas fa-microphone"></i></button>
+                <button class="control-btn active" id="btnCamera" title="Toggle Camera"><i class="fas fa-video"></i></button>
+                <button class="control-btn" id="btnScreen" title="Share Screen"><i class="fas fa-desktop"></i></button>
+                <button class="control-btn" id="btnHand" title="Raise Hand"><i class="fas fa-hand"></i></button>
+                <button class="control-btn" id="btnParticipants" title="Participants"><i class="fas fa-users"></i></button>
+                <button class="control-btn" id="btnChat" title="Meeting Chat"><i class="fas fa-comment-alt"></i></button>
+                <button class="control-btn end-call ms-3" id="btnEnd" title="Leave Call"><i class="fas fa-phone-slash"></i></button>
+            </div>
+        </div>
+
+        <!-- Sidebar Panel (Participants & Chat) -->
+        <div class="meeting-sidebar hidden" id="meetingSidebar">
+            <div class="sidebar-header">
+                <h5 id="sidebarTitle">Meeting Info</h5>
+                <button class="btn btn-icon btn-sm text-white" id="btnCloseSidebar"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <!-- Participants Drawer -->
+            <div class="sidebar-content" id="participantsPanel" style="display:none;">
+                <h6 class="text-muted font-12 text-uppercase fw-bold mb-3">In Meeting (<span id="participantCountBadge">1</span>)</h6>
+                <div class="d-flex flex-column gap-2" id="participantsListContainer">
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded bg-dark text-white">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-circle font-12" style="width:32px; height:32px;">{{ request.user.username|slice:":1"|upper }}</div>
+                            <div>
+                                <div class="font-14 fw-semibold">{{ request.user.username }} (You)</div>
+                                <div class="font-10 text-muted">{% if is_host %}Host{% else %}Participant{% endif %}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Drawer -->
+            <div class="sidebar-content d-flex flex-direction-column" id="chatPanel" style="display:none;">
+                <div class="meeting-chat-messages flex-grow-1 overflow-y-auto mb-3" id="chatMessagesContainer">
+                    <!-- Loaded dynamically -->
+                </div>
+                <form id="meetingChatForm" class="d-flex gap-2">
+                    <input type="text" id="meetingChatInput" class="form-control bg-dark text-white border-secondary font-13" placeholder="Send message..." required>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- WebRTC & App JS -->
+    <script src="{% static 'js/webrtc.js' %}"></script>
+    <script src="{% static 'js/meeting.js' %}"></script>
+    <script>
+        // Simple Call Timer Counter
+        let seconds = 0;
+        setInterval(() => {
+            seconds++;
+            const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(seconds % 60).padStart(2, '0');
+            document.getElementById('meetingTimer').textContent = `${hrs}:${mins}:${secs}`;
+        }, 1000);
+    </script>
+</body>
+</html>

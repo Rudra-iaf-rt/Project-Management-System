@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Preview & Setup | AuraPMS Meeting{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg text-center p-4">
+                {% if participant.state == 'WAITING' %}
+                <div class="py-4">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+                    <h3 class="fw-bold mb-2">Waiting to be admitted...</h3>
+                    <p class="text-muted font-14 mb-4">The host has been notified. You will automatically enter the meeting once approved.</p>
+                    <a href="{% url 'meeting_dashboard' %}" class="btn btn-outline-secondary">Leave Waiting Room</a>
+                </div>
+                {% else %}
+                <div class="mb-4">
+                    <h3 class="fw-bold mb-1">{{ meeting.title }}</h3>
+                    <p class="text-muted font-14">Check your camera and microphone before joining</p>
+                </div>
+
+                <!-- Video Preview Box -->
+                <div class="position-relative bg-dark rounded-3 overflow-hidden mb-4" style="height: 300px;">
+                    <video id="previewVideo" autoplay playsinline muted class="w-100 h-100 object-fit-cover"></video>
+                    <div id="noCameraFallback" class="position-absolute top-50 start-50 translate-middle text-white text-center" style="display:none;">
+                        <i class="fas fa-video-slash font-48 mb-2"></i>
+                        <p class="mb-0 font-14">Camera is Off or Disabled</p>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mb-4">
+                    <button id="togglePrevCam" class="btn btn-light rounded-circle btn-icon"><i class="fas fa-video"></i></button>
+                    <button id="togglePrevMic" class="btn btn-light rounded-circle btn-icon"><i class="fas fa-microphone"></i></button>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'meeting_dashboard' %}" class="btn btn-outline-secondary w-50 py-2">Cancel</a>
+                    <a href="{% url 'meeting_room' meeting.meeting_code %}" class="btn btn-primary w-50 py-2 fw-bold">Join Now</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if participant.state != 'WAITING' %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const video = document.getElementById('previewVideo');
+    const fallback = document.getElementById('noCameraFallback');
+    let stream = null;
+
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        video.srcObject = stream;
+    } catch (e) {
+        fallback.style.display = 'block';
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

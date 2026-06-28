@@ -22,6 +22,7 @@ from apps.notifications.api import NotificationViewSet
 from apps.reports.api import ReportViewSet
 from apps.calendar.api import CalendarEventViewSet
 from apps.chat.api import ChatMessageViewSet
+from apps.meetings.api import MeetingViewSet, MeetingChatViewSet
 
 # Router registration
 router = DefaultRouter()
@@ -34,6 +35,8 @@ router.register(r'notifications', NotificationViewSet, basename='api-notificatio
 router.register(r'reports', ReportViewSet, basename='api-reports')
 router.register(r'calendar/events', CalendarEventViewSet, basename='api-calendar')
 router.register(r'chat/messages', ChatMessageViewSet, basename='api-chat')
+router.register(r'meetings', MeetingViewSet, basename='api-meetings')
+router.register(r'meetings/chat', MeetingChatViewSet, basename='api-meeting-chat')
 
 urlpatterns = [
     path('', dashboard, name='dashboard'),  # Changed from 'home' to 'dashboard'
@@ -50,6 +53,7 @@ urlpatterns = [
     path('files/', include('apps.files.urls')),
     path('notifications/', include('apps.notifications.urls')),
     path('chat/', include('apps.chat.urls')),
+    path('meetings/', include('apps.meetings.urls')),
     path('reports/', include('apps.reports.urls')),
     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='accounts/password_reset.html'), name='password_reset'),
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='accounts/password_reset_done.html'), name='password_reset_done'),
