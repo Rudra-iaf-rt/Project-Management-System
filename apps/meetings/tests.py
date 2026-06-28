@@ -15,9 +15,11 @@ class MeetingModelTests(TestCase):
             start_time=timezone.now(),
             host=self.host
         )
-        MeetingSettings.objects.create(meeting=meeting)
+        # Verify settings were automatically created by signal
+        settings = MeetingSettings.objects.get(meeting=meeting)
         self.assertEqual(meeting.title, 'Test Sprint Sync')
         self.assertEqual(meeting.host, self.host)
+        self.assertTrue(settings.waiting_room_enabled)
 
     def test_meeting_participant_state(self):
         meeting = Meeting.objects.create(

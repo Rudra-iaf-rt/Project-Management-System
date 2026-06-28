@@ -51,12 +51,13 @@ def meeting_room(request, meeting_code):
             messages.error(request, "You are not a member of this team.")
             return redirect('meeting_dashboard')
 
+    settings, _ = MeetingSettings.objects.get_or_create(meeting=meeting)
     participant, created = MeetingParticipant.objects.get_or_create(
         meeting=meeting,
         user=request.user,
         defaults={
             'role': 'HOST' if meeting.host == request.user else 'PARTICIPANT',
-            'state': 'APPROVED' if (meeting.host == request.user or not meeting.settings.waiting_room_enabled) else 'WAITING'
+            'state': 'APPROVED' if (meeting.host == request.user or not settings.waiting_room_enabled) else 'WAITING'
         }
     )
     

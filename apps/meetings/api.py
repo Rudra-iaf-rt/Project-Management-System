@@ -29,17 +29,18 @@ class MeetingViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
         meeting = self.get_object()
+        settings, _ = MeetingSettings.objects.get_or_create(meeting=meeting)
         participant, created = MeetingParticipant.objects.get_or_create(
             meeting=meeting,
             user=request.user,
             defaults={
                 'role': 'HOST' if meeting.host == request.user else 'PARTICIPANT',
-                'state': 'APPROVED' if (meeting.host == request.user or not meeting.settings.waiting_room_enabled) else 'WAITING',
-                'joined_at': timezone.now() if (meeting.host == request.user or not meeting.settings.waiting_room_enabled) else None
+                'state': 'APPROVED' if (meeting.host == request.user or not settings.waiting_room_enabled) else 'WAITING',
+                'joined_at': timezone.now() if (meeting.host == request.user or not settings.waiting_room_enabled) else None
             }
         )
         if not created and participant.state == 'LEFT':
-            participant.state = 'APPROVED' if (meeting.host == request.user or not meeting.settings.waiting_room_enabled) else 'WAITING'
+            participant.state = 'APPROVED' if (meeting.host == request.user or not settings.waiting_room_enabled) else 'WAITING'
             participant.joined_at = timezone.now() if participant.state == 'APPROVED' else None
             participant.save()
             

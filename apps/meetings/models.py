@@ -97,3 +97,11 @@ class MeetingRecording(models.Model):
     
     def __str__(self):
         return f"Recording for {self.meeting.title} ({self.created_at})"
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Meeting)
+def create_meeting_settings(sender, instance, created, **kwargs):
+    if created:
+        MeetingSettings.objects.get_or_create(meeting=instance)
