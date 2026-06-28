@@ -1,4 +1,5 @@
 from django.test import TestCase
+from rest_framework.test import APITestCase
 from django.utils import timezone
 from apps.accounts.models import User
 from apps.meetings.models import Meeting, MeetingParticipant, MeetingSettings
@@ -35,3 +36,19 @@ class MeetingModelTests(TestCase):
             state='APPROVED'
         )
         self.assertEqual(p.state, 'APPROVED')
+
+class MeetingAPITests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='apiuser', password='password123', role='PROJECT_MANAGER')
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_instant_meeting_api(self):
+        payload = {
+            "title": "Instant Test Meeting",
+            "description": "API Instant test call",
+            "start_time": timezone.now().isoformat(),
+            "duration_minutes": 45
+        }
+        response = self.client.post('/api/meetings/', payload, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('meeting_code', response.data)

@@ -41,7 +41,11 @@ class MeetingSerializer(serializers.ModelSerializer):
         validated_data['meeting_code'] = f"{rand_str(3)}-{rand_str(4)}-{rand_str(3)}"
         
         meeting = Meeting.objects.create(**validated_data)
-        MeetingSettings.objects.create(meeting=meeting, **settings_data)
+        if settings_data:
+            settings_instance = meeting.settings
+            for attr, value in settings_data.items():
+                setattr(settings_instance, attr, value)
+            settings_instance.save()
         return meeting
 
     def update(self, instance, validated_data):
