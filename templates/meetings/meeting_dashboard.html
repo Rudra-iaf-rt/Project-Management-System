@@ -195,6 +195,21 @@
 
 {% block extra_js %}
 <script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Set default start time to now
     const now = new Date();
@@ -228,28 +243,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('btnLaunchInstant').addEventListener('click', async () => {
-        const payload = {
-            title: "Instant Meeting (" + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + ")",
-            description: "Instant video conference call.",
-            start_time: new Date().toISOString(),
-            duration_minutes: 60
-        };
+    const btnInstant = document.getElementById('btnLaunchInstant');
+    if (btnInstant) {
+        btnInstant.addEventListener('click', async () => {
+            btnInstant.disabled = true;
+            btnInstant.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Launching...';
+            
+            const payload = {
+                title: "Instant Meeting (" + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + ")",
+                description: "Instant video conference call.",
+                start_time: new Date().toISOString(),
+                duration_minutes: 60
+            };
 
-        const res = await fetch('/api/meetings/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify(payload)
+            try {
+                const res = await fetch('/api/meetings/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    window.location.href = `/meetings/room/${data.meeting_code}/`;
+                } else {
+                    const errData = await res.json();
+                    alert("Failed to start call: " + JSON.stringify(errData));
+                    btnInstant.disabled = false;
+                    btnInstant.textContent = 'Start Call Now';
+                }
+            } catch (err) {
+                alert("Network error starting meeting: " + err.message);
+                btnInstant.disabled = false;
+                btnInstant.textContent = 'Start Call Now';
+            }
         });
-
-        if (res.ok) {
-            const data = await res.json();
-            window.location.href = `/meetings/room/${data.meeting_code}/`;
-        }
-    });
+    }
 });
 </script>
 {% endblock %}
